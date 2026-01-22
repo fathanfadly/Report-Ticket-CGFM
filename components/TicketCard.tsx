@@ -26,10 +26,13 @@ const TicketCard = ({ id, title, tags, date, image_url, likes, priority, created
     const isSpecial = isCompleted || isBlocked;
     return (
         <div
-            onClick={() => onClick?.({ id, title, tags, date, image_url, likes, priority, created_at, status, solution })}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick?.({ id, title, tags, date, image_url, likes, priority, created_at, status, solution });
+            }}
             className={clsx(
-                "group relative flex w-[280px] flex-col gap-3 rounded-xl bg-white p-3 shadow-sm border transition-all shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-100",
-                isCompleted ? "border-green-200 bg-green-50/30" : isBlocked ? "border-red-200 bg-red-50/30" : "border-gray-100 hover:shadow-md active:scale-[0.98]"
+                "group relative flex w-[280px] flex-col gap-3 rounded-xl bg-white p-3 shadow-sm border transition-all shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-100/50 hover:border-indigo-200 hover:shadow-lg active:scale-[0.98]",
+                isCompleted ? "border-green-200 bg-green-50/30" : isBlocked ? "border-red-200 bg-red-50/30" : "border-gray-100"
             )}
         >
             <div className="absolute right-2 top-2 z-10 hidden items-center gap-1 group-hover:flex">
