@@ -20,7 +20,7 @@ interface KanbanBoardProps {
 }
 
 // Draggable Ticket Wrapper
-const DraggableTicket = ({ ticket, onDelete, onSolve, onBlock, onClick }: { ticket: any, onDelete: (id: string) => void, onSolve: (id: string) => void, onBlock: (id: string) => void, onClick: (ticket: any) => void }) => {
+const DraggableTicket = ({ ticket, onDelete, onSolve, onBlock, onDoubleClick }: { ticket: any, onDelete: (id: string) => void, onSolve: (id: string) => void, onBlock: (id: string) => void, onDoubleClick: (ticket: any) => void }) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: ticket.id,
     });
@@ -33,7 +33,7 @@ const DraggableTicket = ({ ticket, onDelete, onSolve, onBlock, onClick }: { tick
 
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-            <TicketCard {...ticket} onDelete={onDelete} onSolve={onSolve} onBlock={onBlock} onClick={onClick} />
+            <TicketCard {...ticket} onDelete={onDelete} onSolve={onSolve} onBlock={onBlock} onDoubleClick={onDoubleClick} />
         </div>
     );
 };
@@ -123,7 +123,7 @@ const KanbanBoard = ({ tickets, onTicketMove, onDelete, onSolve, onBlock, onDele
                             ticketCount={tickets.filter(t => t.status === column.id).length}
                         >
                             {tickets.filter(t => t.status === column.id).map((ticket) => (
-                                <DraggableTicket key={ticket.id} ticket={ticket} onDelete={onDelete} onSolve={onSolve} onBlock={onBlock} onClick={onTicketClick} />
+                                <DraggableTicket key={ticket.id} ticket={ticket} onDelete={onDelete} onSolve={onSolve} onBlock={onBlock} onDoubleClick={onTicketClick} />
                             ))}
                             {tickets.filter(t => t.status === column.id).length === 0 && (
                                 <div className="text-center text-gray-300 text-xs py-10 pointer-events-none">Drop here</div>

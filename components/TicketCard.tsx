@@ -14,21 +14,40 @@ interface TicketCardProps {
     created_at?: string;
     status: string;
     solution?: string;
+    kategori_laporan?: string;
+    description?: string;
+    nama_pelapor?: string;
+    nomor_telepon?: string;
+    pekerjaan?: string;
+    alamat?: string;
+    tipe_pelapor?: string;
+    kode_broadcaster?: string;
+    sumber_laporan?: string;
+    judul_laporan?: string;
     onDelete: (id: string) => void;
     onSolve: (id: string) => void;
     onBlock?: (id: string) => void;
-    onClick?: (ticket: any) => void;
+    onDoubleClick?: (ticket: any) => void;
 }
 
-const TicketCard = ({ id, title, tags, date, image_url, likes, priority, created_at, status, solution, onDelete, onSolve, onBlock, onClick }: TicketCardProps) => {
+const TicketCard = (props: TicketCardProps) => {
+    const {
+        id, title, tags, date, image_url, likes, priority, created_at, status, solution,
+        kategori_laporan, description, nama_pelapor, nomor_telepon, pekerjaan, alamat,
+        tipe_pelapor, kode_broadcaster, sumber_laporan, judul_laporan,
+        onDelete, onSolve, onBlock, onDoubleClick
+    } = props;
+
     const isCompleted = status === 'completed';
     const isBlocked = status === 'blocked';
     const isSpecial = isCompleted || isBlocked;
+
     return (
         <div
-            onClick={(e) => {
+            onDoubleClick={(e) => {
                 e.stopPropagation();
-                onClick?.({ id, title, tags, date, image_url, likes, priority, created_at, status, solution });
+                // Pass the entire ticket data for the modals
+                onDoubleClick?.({ ...props });
             }}
             className={clsx(
                 "group relative flex w-[280px] flex-col gap-3 rounded-xl bg-white p-3 shadow-sm border transition-all shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-100/50 hover:border-indigo-200 hover:shadow-lg active:scale-[0.98]",
@@ -85,12 +104,29 @@ const TicketCard = ({ id, title, tags, date, image_url, likes, priority, created
                     {isSpecial ? "✓" : "✓"}
                 </div>
                 <div className="flex flex-col gap-1 w-full overflow-hidden">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                        {id && <span className="text-[9px] font-bold text-gray-400 bg-gray-50 px-1 rounded border border-gray-100">#{id.slice(0, 4)}</span>}
+                        {id.startsWith('BC') || (id.length < 10 && id.includes('BC')) ? null : null} {/* Placeholder for broadcaster logic if id was broadcaster */}
+                    </div>
                     <h3 className={clsx(
                         "text-sm font-semibold leading-tight line-clamp-2",
                         isCompleted ? "text-gray-400 line-through" : isBlocked ? "text-red-700" : "text-gray-800"
                     )}>
                         {title}
                     </h3>
+
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                        {kategori_laporan && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-600 border border-purple-100 font-bold uppercase">
+                                {kategori_laporan}
+                            </span>
+                        )}
+                        {tags && tags.map((tag: any, i: number) => (
+                            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-500 border border-slate-100">
+                                {tag.label}
+                            </span>
+                        ))}
+                    </div>
 
                     {solution && (
                         <div className={clsx(
