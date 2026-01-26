@@ -75,6 +75,9 @@ export default function Home() {
   };
 
   const handleTicketMove = async (ticketId: string, newStatus: string) => {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (!ticket || ticket.status === newStatus) return;
+
     if (newStatus === 'completed') {
       handleSolveClick(ticketId);
       return;
@@ -126,6 +129,12 @@ export default function Home() {
     setIsAddTicketOpen(true);
   };
 
+  const handleCommentAdded = (ticketId: string, lastComment: string, commentCount: number) => {
+    setTickets(prev => prev.map(t =>
+      t.id === ticketId ? { ...t, last_comment: lastComment, comment_count: commentCount } : t
+    ));
+  };
+
   const handleUpdateTicket = async (updatedData: any) => {
     const previousTickets = [...tickets];
 
@@ -165,10 +174,14 @@ export default function Home() {
         body: JSON.stringify(updatePayload),
         headers: { 'Content-Type': 'application/json' }
       });
-      if (!res.ok) throw new Error("Update failed");
-    } catch (error) {
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Update failed");
+      }
+    } catch (error: any) {
       setTickets(previousTickets);
       console.error("Update failed:", error);
+      alert("Update failed: " + error.message);
     } finally {
       setSelectedTicket(null);
     }
@@ -215,10 +228,14 @@ export default function Home() {
         }),
         headers: { 'Content-Type': 'application/json' }
       });
-      if (!res.ok) throw new Error("Update failed");
-    } catch (error) {
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Update failed");
+      }
+    } catch (error: any) {
       setTickets(previousTickets);
       console.error(`${resolutionMode} failed:`, error);
+      alert(`${resolutionMode} failed: ` + error.message);
     } finally {
       setSolvingTicket(null);
     }
@@ -288,6 +305,7 @@ export default function Home() {
           onClose={() => setIsDetailOpen(false)}
           ticket={selectedTicket}
           onEdit={handleEditTicket}
+          onCommentAdded={handleCommentAdded}
         />
 
         <StatusResolutionModal

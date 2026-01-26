@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ReporterEditModal from '@/components/ReporterEditModal';
-import { Search, ChevronLeft, ChevronRight, User, Phone, Briefcase, MapPin, Edit2, Trash2, Download } from 'lucide-react';
+import ReporterDetailModal from '@/components/ReporterDetailModal';
+import { Search, ChevronLeft, ChevronRight, User, Phone, Briefcase, MapPin, Edit2, Trash2, Download, Eye } from 'lucide-react';
 import { clsx } from 'clsx';
 import * as XLSX from 'xlsx';
 
@@ -21,6 +22,7 @@ export default function ReportersPage() {
 
     const [selectedReporter, setSelectedReporter] = useState<any | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
     const fetchReporters = async (page = 1, query = '') => {
         setIsLoading(true);
@@ -63,11 +65,25 @@ export default function ReportersPage() {
 
             // Map data to Excel format
             const excelData = allReporters.map((rep: any) => ({
-                'Name': rep.nama,
-                'Type': rep.tipe_pelapor,
-                'Phone Number': rep.nomor_telepon,
-                'Job': rep.pekerjaan,
-                'Address': rep.alamat
+                'id': rep.id,
+                'nama': rep.nama,
+                'tipe_pelapor': rep.tipe_pelapor,
+                'no_hp': rep.no_hp,
+                'alamat': rep.alamat,
+                'pekerjaan': rep.pekerjaan,
+                'jabatan': rep.jabatan,
+                'pendidikan': rep.pendidikan,
+                'usia': rep.usia,
+                'jenis_kelamin': rep.jenis_kelamin,
+                'hobi': rep.hobi,
+                'pilihan_jenis_lagu': rep.pilihan_jenis_lagu,
+                'alat_transportasi': rep.alat_transportasi,
+                'range_harga_gadget': rep.range_harga_gadget,
+                'radio_sering_diputar': rep.radio_sering_diputar,
+                'acara_radio_favorit': rep.acara_radio_favorit,
+                'objek_wisata_favorit': rep.objek_wisata_favorit,
+                'tv_sering_ditonton': rep.tv_sering_ditonton,
+                'acara_tv_favorit': rep.acara_tv_favorit
             }));
 
             // Create workbook and worksheet
@@ -77,11 +93,25 @@ export default function ReportersPage() {
 
             // Set column widths
             const wscols = [
+                { wch: 5 },  // ID
                 { wch: 25 }, // Name
                 { wch: 15 }, // Type
                 { wch: 20 }, // Phone
-                { wch: 20 }, // Job
                 { wch: 40 }, // Address
+                { wch: 20 }, // Job
+                { wch: 20 }, // Position
+                { wch: 20 }, // Education
+                { wch: 10 }, // Age
+                { wch: 15 }, // Gender
+                { wch: 30 }, // Hobby
+                { wch: 25 }, // Song Type
+                { wch: 20 }, // Transportation
+                { wch: 20 }, // Gadget
+                { wch: 30 }, // Freq Radio
+                { wch: 30 }, // Fav Radio
+                { wch: 30 }, // Fav Tourist
+                { wch: 30 }, // Freq TV
+                { wch: 30 }, // Fav TV
             ];
             worksheet['!cols'] = wscols;
 
@@ -143,6 +173,15 @@ export default function ReportersPage() {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onSave={handleEditSave}
+                reporter={selectedReporter}
+            />
+            <ReporterDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                onEdit={(rep) => {
+                    setSelectedReporter(rep);
+                    setIsEditModalOpen(true);
+                }}
                 reporter={selectedReporter}
             />
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -220,7 +259,7 @@ export default function ReportersPage() {
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-1.5 text-xs text-indigo-600 font-semibold uppercase tracking-tight">
                                                         <Phone className="h-3 w-3" />
-                                                        {rep.nomor_telepon || 'No Phone'}
+                                                        {rep.no_hp || 'No Phone'}
                                                     </div>
                                                 </div>
                                             </td>
@@ -241,12 +280,12 @@ export default function ReportersPage() {
                                                     <button
                                                         onClick={() => {
                                                             setSelectedReporter(rep);
-                                                            setIsEditModalOpen(true);
+                                                            setIsDetailModalOpen(true);
                                                         }}
-                                                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                                        title="Edit Reporter"
+                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                        title="See Details"
                                                     >
-                                                        <Edit2 className="h-4 w-4" />
+                                                        <Eye className="h-4 w-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(rep.id)}

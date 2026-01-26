@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Edit2, Calendar, Clock, Tag, Share2, Paperclip, ChevronDown, User, Send, Eye, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Edit2, Calendar, Clock, Tag, Share2, Paperclip, ChevronDown, User, Send, Eye, Download, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { clsx } from 'clsx';
 
@@ -8,9 +8,65 @@ interface TicketDetailModalProps {
     onClose: () => void;
     ticket: any;
     onEdit: (ticket: any) => void;
+    onCommentAdded?: (ticketId: string, lastComment: string, commentCount: number) => void;
 }
 
-const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit }: TicketDetailModalProps) => {
+const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit, onCommentAdded }: TicketDetailModalProps) => {
+    const [activities, setActivities] = useState<any[]>([]);
+    const [newComment, setNewComment] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen && ticket?.id) {
+            fetchActivities();
+        }
+    }, [isOpen, ticket?.id]);
+
+    const fetchActivities = async () => {
+        if (!ticket?.id) return;
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/tickets/${ticket.id}/activities`);
+            if (response.ok) {
+                const data = await response.json();
+                setActivities(data);
+            }
+        } catch (error) {
+            console.error('Error fetching activities:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSendComment = async () => {
+        if (!newComment.trim() || isSending) return;
+
+        setIsSending(true);
+        try {
+            const response = await fetch(`/api/tickets/${ticket.id}/activities`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: newComment }),
+            });
+
+            if (response.ok) {
+                const addedActivity = await response.json();
+                const updatedActivities = [addedActivity, ...activities];
+                setActivities(updatedActivities);
+                setNewComment('');
+
+                if (onCommentAdded) {
+                    onCommentAdded(ticket.id, addedActivity.content, updatedActivities.length);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending comment:', error);
+        } finally {
+            setIsSending(false);
+        }
+    };
+
     if (!isOpen || !ticket) return null;
 
     const isCompleted = ticket.status === 'completed';
@@ -82,18 +138,109 @@ const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit }: TicketDetailModa
                                 </section>
                             )}
 
-                            {/* Comments Section (Simplified for now) */}
+                            {/* Comments Section */}
                             <section className="flex flex-col gap-4">
                                 <h4 className="text-sm font-semibold text-gray-700">Aktivitas Laporan</h4>
+
+                                {/* Comment Input */}
                                 <div className="relative">
                                     <textarea
                                         placeholder="Add a comment..."
                                         className="w-full rounded-xl border border-gray-200 p-4 pr-12 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none resize-none bg-slate-50/30"
                                         rows={2}
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        disabled={isSending}
                                     />
-                                    <button className="absolute right-3 bottom-3 p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors">
-                                        <Send className="h-4 w-4" />
+                                    <button
+                                        onClick={handleSendComment}
+                                        disabled={isSending || !newComment.trim()}
+                                        className="absolute right-3 bottom-3 p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Send className={clsx("h-4 w-4", isSending && "animate-pulse")} />
                                     </button>
+                                </div>
+
+                                {/* Activities List */}
+                                <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto no-scrollbar pr-2">
+                                    {isLoading ? (
+                                        <div className="flex justify-center p-4">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-500"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Highlighted Reason/Solution at Top */}
+                                            {ticket.solution && (
+                                                <div className={clsx(
+                                                    "flex gap-3 p-4 rounded-2xl border animate-in slide-in-from-top-4 duration-500 shadow-sm mb-2",
+                                                    ticket.status === 'completed'
+                                                        ? "bg-green-50/50 border-green-100 ring-4 ring-green-50/20"
+                                                        : "bg-red-50/50 border-red-100 ring-4 ring-red-50/20"
+                                                )}>
+                                                    <div className="shrink-0">
+                                                        <div className={clsx(
+                                                            "h-10 w-10 rounded-full flex items-center justify-center shadow-sm",
+                                                            ticket.status === 'completed' ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                                        )}>
+                                                            {ticket.status === 'completed' ? <CheckCircle className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col gap-1 flex-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className={clsx(
+                                                                "text-[10px] font-black uppercase tracking-widest",
+                                                                ticket.status === 'completed' ? "text-green-600" : "text-red-600"
+                                                            )}>
+                                                                {ticket.status === 'completed' ? "Official Resolution" : "Status Blocked Result"}
+                                                            </span>
+                                                            {ticket.updated_at && (
+                                                                <span className="text-[10px] text-gray-400 font-medium bg-white/80 px-2 py-0.5 rounded-full border border-gray-100">
+                                                                    {format(parseISO(ticket.updated_at), 'MMM d, h:mm aa')}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className={clsx(
+                                                            "text-sm font-bold leading-relaxed",
+                                                            ticket.status === 'completed' ? "text-green-900" : "text-red-900"
+                                                        )}>
+                                                            {ticket.solution}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {activities.length > 0 ? (
+                                                activities.map((activity) => (
+                                                    <div key={activity.id} className="flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                        <div className="shrink-0 mt-1">
+                                                            <div className="h-8 w-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                                                <MessageSquare className="h-4 w-4" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col gap-1 flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-gray-700">Sistem / Admin</span>
+                                                                <span className="text-[10px] text-gray-400 font-medium">
+                                                                    {format(parseISO(activity.created_at), 'MMM d, h:mm aa')}
+                                                                </span>
+                                                            </div>
+                                                            <div className="rounded-2xl rounded-tl-none bg-white border border-gray-100 p-3 shadow-sm">
+                                                                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                                                                    {activity.content}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                !ticket.solution && (
+                                                    <div className="text-center py-8 text-gray-400">
+                                                        <p className="text-sm">Belum ada aktivitas.</p>
+                                                    </div>
+                                                )
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </section>
                         </div>
@@ -160,10 +307,10 @@ const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit }: TicketDetailModa
                                         )}
                                     </div>
 
-                                    {ticket.nomor_telepon && (
+                                    {(ticket.no_hp || ticket.nomor_telepon) && (
                                         <div className="flex flex-col gap-1">
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Telepon</span>
-                                            <span className="text-sm font-medium text-indigo-600">{ticket.nomor_telepon}</span>
+                                            <span className="text-sm font-medium text-indigo-600">{ticket.no_hp || ticket.nomor_telepon}</span>
                                         </div>
                                     )}
 

@@ -17,6 +17,7 @@ interface TicketCardProps {
     kategori_laporan?: string;
     description?: string;
     nama_pelapor?: string;
+    no_hp?: string;
     nomor_telepon?: string;
     pekerjaan?: string;
     alamat?: string;
@@ -24,6 +25,8 @@ interface TicketCardProps {
     kode_broadcaster?: string;
     sumber_laporan?: string;
     judul_laporan?: string;
+    comment_count?: number;
+    last_comment?: string;
     onDelete: (id: string) => void;
     onSolve: (id: string) => void;
     onBlock?: (id: string) => void;
@@ -33,8 +36,9 @@ interface TicketCardProps {
 const TicketCard = (props: TicketCardProps) => {
     const {
         id, title, tags, date, image_url, likes, priority, created_at, status, solution,
-        kategori_laporan, description, nama_pelapor, nomor_telepon, pekerjaan, alamat,
+        kategori_laporan, description, nama_pelapor, no_hp, nomor_telepon, pekerjaan, alamat,
         tipe_pelapor, kode_broadcaster, sumber_laporan, judul_laporan,
+        comment_count, last_comment,
         onDelete, onSolve, onBlock, onDoubleClick
     } = props;
 
@@ -50,7 +54,7 @@ const TicketCard = (props: TicketCardProps) => {
                 onDoubleClick?.({ ...props });
             }}
             className={clsx(
-                "group relative flex w-[280px] flex-col gap-3 rounded-xl bg-white p-3 shadow-sm border transition-all shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-100/50 hover:border-indigo-200 hover:shadow-lg active:scale-[0.98]",
+                "group relative flex w-full flex-col gap-3 rounded-xl bg-white p-3 shadow-sm border transition-all shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-100/50 hover:border-indigo-200 hover:shadow-lg active:scale-[0.98]",
                 isCompleted ? "border-green-200 bg-green-50/30" : isBlocked ? "border-red-200 bg-red-50/30" : "border-gray-100"
             )}
         >
@@ -74,9 +78,14 @@ const TicketCard = (props: TicketCardProps) => {
                     </button>
                 )}
                 <button
-                    onDoubleClick={(e) => { e.stopPropagation(); onDelete(id); }}
-                    className="rounded-md bg-white/80 p-1.5 text-gray-500 shadow-sm backdrop-blur-sm hover:bg-gray-100 transition-all border border-gray-100"
-                    title="Double click to delete"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm("Are you sure you want to delete this ticket?")) {
+                            onDelete(id);
+                        }
+                    }}
+                    className="rounded-md bg-white/80 p-1.5 text-gray-500 shadow-sm backdrop-blur-sm hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
+                    title="Click to delete"
                 >
                     <Trash2 className="h-4 w-4" />
                 </button>
@@ -145,6 +154,7 @@ const TicketCard = (props: TicketCardProps) => {
                             )}>{solution}</p>
                         </div>
                     )}
+
                 </div>
             </div>
 
@@ -167,10 +177,19 @@ const TicketCard = (props: TicketCardProps) => {
                         <span className="text-[10px] text-gray-400">{date}</span>
                     </div>
                     <div className="flex items-center gap-1 text-gray-400">
-                        <ThumbsUp className="h-3 w-3" />
-                        <span className="text-[10px]">{likes}</span>
+                        <MessageSquare className="h-3 w-3" />
+                        <span className="text-[10px]">{comment_count || 0}</span>
                     </div>
                 </div>
+
+                {last_comment && (
+                    <div className="px-1 py-1.5 bg-slate-50/50 rounded-lg border border-slate-100/50 my-0.5">
+                        <p className="text-[10px] leading-snug text-slate-600 line-clamp-1 italic">
+                            <span className="font-bold text-[8px] uppercase text-slate-400 not-italic mr-1.5">Last:</span>
+                            {last_comment}
+                        </p>
+                    </div>
+                )}
 
                 {created_at && (
                     <div className="flex items-center gap-1 text-gray-300">

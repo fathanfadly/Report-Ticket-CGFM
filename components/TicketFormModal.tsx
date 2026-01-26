@@ -31,6 +31,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
     const [sumberLaporan, setSumberLaporan] = useState('');
     const [kategoriLaporan, setKategoriLaporan] = useState('');
     const [description, setDescription] = useState('');
+    const [solution, setSolution] = useState('');
 
     // UI/Image states
     const [imageUrl, setImageUrl] = useState('');
@@ -52,6 +53,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
         setSumberLaporan('');
         setKategoriLaporan('');
         setDescription('');
+        setSolution('');
         setImageUrl('');
         setFile(null);
         setPreview(null);
@@ -62,7 +64,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
             setReporterId(initialData.reporter_id || null);
             setTipePelapor(initialData.tipe_pelapor || '');
             setNamaPelapor(initialData.nama_pelapor || initialData.nama || '');
-            setNomorTelepon(initialData.nomor_telepon || '');
+            setNomorTelepon(initialData.no_hp || initialData.nomor_telepon || '');
             setPekerjaan(initialData.pekerjaan || '');
             setAlamat(initialData.alamat || '');
             setKodeBroadcaster(initialData.kode_broadcaster || '');
@@ -72,6 +74,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
             setSumberLaporan(initialData.sumber_laporan || '');
             setKategoriLaporan(initialData.kategori_laporan || '');
             setDescription(initialData.description || '');
+            setSolution(initialData.solution || '');
             setImageUrl(initialData.image_url || '');
             setPreview(initialData.image_url || null);
         } else {
@@ -89,7 +92,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
             tipe_pelapor: tipePelapor,
             nama_pelapor: namaPelapor,
             nama: namaPelapor, // Fallback for old code
-            nomor_telepon: nomorTelepon,
+            no_hp: nomorTelepon,
             pekerjaan: pekerjaan,
             alamat: alamat,
             // Report Section
@@ -101,6 +104,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
             sumber_laporan: sumberLaporan,
             kategori_laporan: kategoriLaporan,
             description,
+            ...((status === 'completed' || status === 'blocked') ? { solution } : {}),
             image_url: imageUrl || preview || null,
             file: file,
         });
@@ -149,7 +153,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
         setReporterId(rep.id);
         setTipePelapor(rep.tipe_pelapor || '');
         setNamaPelapor(rep.nama || '');
-        setNomorTelepon(rep.nomor_telepon || '');
+        setNomorTelepon(rep.no_hp || '');
         setPekerjaan(rep.pekerjaan || '');
         setAlamat(rep.alamat || '');
         setShowSelector(false);
@@ -161,7 +165,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
             {/* Reporter Selection Sub-Modal */}
             {showSelector && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-gray-900">Pilih Pelapor</h3>
@@ -174,7 +178,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             <input
                                 autoFocus
                                 type="text"
-                                placeholder="Cari nama atau nomor telepon..."
+                                placeholder="Cari nama atau no hp..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pl-11 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
@@ -199,7 +203,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                                     >
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">{rep.nama}</span>
-                                            <span className="text-xs text-gray-400">{rep.nomor_telepon || 'No Phone'} • {rep.tipe_pelapor}</span>
+                                            <span className="text-xs text-gray-400">{rep.no_hp || 'No Phone'} • {rep.tipe_pelapor}</span>
                                         </div>
                                         <div className="p-2 rounded-lg bg-gray-50 text-gray-300 group-hover:bg-white group-hover:text-indigo-400 transition-all">
                                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -282,7 +286,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Nomor Telepon</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">No HP</label>
                                 <input
                                     type="tel"
                                     value={nomorTelepon}
@@ -429,6 +433,22 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                                     className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"
                                 />
                             </div>
+
+                            {(status === 'completed' || status === 'blocked') && (
+                                <div className="md:col-span-2 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-indigo-500">
+                                        {status === 'completed' ? 'Solution / Resolution' : 'Reason for Blocking'} *
+                                    </label>
+                                    <textarea
+                                        required
+                                        value={solution}
+                                        onChange={(e) => setSolution(e.target.value)}
+                                        placeholder={status === 'completed' ? "Describe how this was solved..." : "Describe why this is blocked..."}
+                                        rows={3}
+                                        className="w-full rounded-xl border-2 border-indigo-100 bg-indigo-50/10 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none shadow-sm shadow-indigo-50/50"
+                                    />
+                                </div>
+                            )}
 
                             <div className="md:col-span-2">
                                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Attachment (Image)</label>

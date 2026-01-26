@@ -5,7 +5,11 @@ import { RowDataPacket } from 'mysql2';
 export async function GET() {
     try {
         const query = `
-            SELECT t.*, r.tipe_pelapor, r.nama as nama_pelapor, r.nomor_telepon, r.pekerjaan, r.alamat
+            SELECT 
+                t.*, 
+                r.tipe_pelapor, r.nama as nama_pelapor, r.no_hp as nomor_telepon, r.pekerjaan, r.alamat,
+                (SELECT COUNT(*) FROM Ticket_Activities WHERE ticket_id = t.id) as comment_count,
+                (SELECT content FROM Ticket_Activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
             FROM tickets t
             LEFT JOIN Reporters_Info r ON t.reporter_id = r.id
             ORDER BY t.created_at DESC
@@ -15,7 +19,11 @@ export async function GET() {
         let completedRows: RowDataPacket[] = [];
         try {
             const completedQuery = `
-                SELECT t.*, r.tipe_pelapor, r.nama as nama_pelapor, r.nomor_telepon, r.pekerjaan, r.alamat
+                SELECT 
+                    t.*, 
+                    r.tipe_pelapor, r.nama as nama_pelapor, r.no_hp as nomor_telepon, r.pekerjaan, r.alamat,
+                    (SELECT COUNT(*) FROM Ticket_Activities WHERE ticket_id = t.id) as comment_count,
+                    (SELECT content FROM Ticket_Activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
                 FROM completed_tickets t
                 LEFT JOIN Reporters_Info r ON t.reporter_id = r.id
                 ORDER BY t.created_at DESC
@@ -46,7 +54,7 @@ export async function POST(request: Request) {
         const body = await request.json();
         const {
             id, judul_laporan, priority, status, date_range, iso_date, likes, image_url, tags, description,
-            tipe_pelapor, nama_pelapor, nomor_telepon, pekerjaan, alamat,
+            tipe_pelapor, nama_pelapor, no_hp, pekerjaan, alamat,
             kode_broadcaster, sumber_laporan, kategori_laporan
         } = body;
 
@@ -55,8 +63,8 @@ export async function POST(request: Request) {
 
         if (!reporter_id_to_use) {
             const [reporterResult]: any = await pool.query(
-                'INSERT INTO Reporters_Info (tipe_pelapor, nama, nomor_telepon, pekerjaan, alamat) VALUES (?, ?, ?, ?, ?)',
-                [tipe_pelapor, nama_pelapor, nomor_telepon, pekerjaan, alamat]
+                'INSERT INTO Reporters_Info (tipe_pelapor, nama, no_hp, pekerjaan, alamat) VALUES (?, ?, ?, ?, ?)',
+                [tipe_pelapor, nama_pelapor, no_hp, pekerjaan, alamat]
             );
             reporter_id_to_use = reporterResult.insertId;
         }
@@ -79,7 +87,7 @@ export async function PATCH(request: Request) {
         const body = await request.json();
         const {
             id, status, solution, judul_laporan, title, priority, image_url, tags, description,
-            tipe_pelapor, nama_pelapor, nomor_telepon, pekerjaan, alamat,
+            tipe_pelapor, nama_pelapor, no_hp, pekerjaan, alamat,
             kode_broadcaster, sumber_laporan, kategori_laporan
         } = body;
 
@@ -92,12 +100,12 @@ export async function PATCH(request: Request) {
         const reporter_id = rows.length > 0 ? rows[0].reporter_id : null;
 
         // 1. Update Reporter Info if reporter_id exists and data provided
-        if (reporter_id && (tipe_pelapor || nama_pelapor || nomor_telepon || pekerjaan || alamat)) {
+        if (reporter_id && (tipe_pelapor || nama_pelapor || no_hp || pekerjaan || alamat)) {
             const repFields: string[] = [];
             const repValues: any[] = [];
             if (tipe_pelapor !== undefined) { repFields.push('tipe_pelapor = ?'); repValues.push(tipe_pelapor); }
             if (nama_pelapor !== undefined) { repFields.push('nama = ?'); repValues.push(nama_pelapor); }
-            if (nomor_telepon !== undefined) { repFields.push('nomor_telepon = ?'); repValues.push(nomor_telepon); }
+            if (no_hp !== undefined) { repFields.push('no_hp = ?'); repValues.push(no_hp); }
             if (pekerjaan !== undefined) { repFields.push('pekerjaan = ?'); repValues.push(pekerjaan); }
             if (alamat !== undefined) { repFields.push('alamat = ?'); repValues.push(alamat); }
 
@@ -138,6 +146,10 @@ export async function PATCH(request: Request) {
         }
 
         // 3. Generic UPDATE logic
+        const [ongoing] = await pool.query<RowDataPacket[]>('SELECT id FROM tickets WHERE id = ?', [id]);
+        const isOngoing = ongoing.length > 0;
+        const tableName = isOngoing ? 'tickets' : 'completed_tickets';
+
         const updateFields: string[] = [];
         const updateValues: any[] = [];
 
@@ -148,7 +160,13 @@ export async function PATCH(request: Request) {
         if (status !== undefined) { updateFields.push('status = ?'); updateValues.push(status); }
         if (image_url !== undefined) { updateFields.push('image_url = ?'); updateValues.push(image_url); }
         if (tags !== undefined) { updateFields.push('tags = ?'); updateValues.push(JSON.stringify(tags)); }
-        if (solution !== undefined) { updateFields.push('solution = ?'); updateValues.push(solution); }
+
+        // Only add solution if it's the terminal table
+        if (solution !== undefined && !isOngoing) {
+            updateFields.push('solution = ?');
+            updateValues.push(solution);
+        }
+
         if (description !== undefined) { updateFields.push('description = ?'); updateValues.push(description); }
         if (kode_broadcaster !== undefined) { updateFields.push('kode_broadcaster = ?'); updateValues.push(kode_broadcaster); }
         if (sumber_laporan !== undefined) { updateFields.push('sumber_laporan = ?'); updateValues.push(sumber_laporan); }
@@ -156,15 +174,7 @@ export async function PATCH(request: Request) {
 
         if (updateFields.length > 0) {
             updateValues.push(id);
-            const setClause = updateFields.join(', ');
-
-            // Check ongoing first
-            const [ongoing] = await pool.query<RowDataPacket[]>('SELECT id FROM tickets WHERE id = ?', [id]);
-            if (ongoing.length > 0) {
-                await pool.query(`UPDATE tickets SET ${setClause} WHERE id = ?`, updateValues);
-            } else {
-                await pool.query(`UPDATE completed_tickets SET ${setClause} WHERE id = ?`, updateValues);
-            }
+            await pool.query(`UPDATE ${tableName} SET ${updateFields.join(', ')} WHERE id = ?`, updateValues);
         }
 
         return NextResponse.json({ success: true });

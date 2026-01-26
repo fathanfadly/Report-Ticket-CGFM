@@ -16,7 +16,7 @@ export async function GET(request: Request) {
         let values: any[] = [];
 
         if (query) {
-            const whereClause = ' WHERE nama LIKE ? OR nomor_telepon LIKE ?';
+            const whereClause = ' WHERE nama LIKE ? OR no_hp LIKE ?';
             sql += whereClause;
             countSql += whereClause;
             values = [`%${query}%`, `%${query}%`];
@@ -55,7 +55,13 @@ export async function PATCH(request: Request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         const body = await request.json();
-        const { name, type, phone, job, address } = body;
+        const {
+            name, type, phone, job, address,
+            jabatan, pendidikan, usia, jenis_kelamin, hobi,
+            pilihan_jenis_lagu, alat_transportasi, range_harga_gadget,
+            radio_sering_diputar, acara_radio_favorit, objek_wisata_favorit,
+            tv_sering_ditonton, acara_tv_favorit
+        } = body;
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
@@ -64,9 +70,22 @@ export async function PATCH(request: Request) {
 
         if (name !== undefined) { fields.push('nama = ?'); values.push(name); }
         if (type !== undefined) { fields.push('tipe_pelapor = ?'); values.push(type); }
-        if (phone !== undefined) { fields.push('nomor_telepon = ?'); values.push(phone); }
+        if (phone !== undefined) { fields.push('no_hp = ?'); values.push(phone); }
         if (job !== undefined) { fields.push('pekerjaan = ?'); values.push(job); }
         if (address !== undefined) { fields.push('alamat = ?'); values.push(address); }
+        if (jabatan !== undefined) { fields.push('jabatan = ?'); values.push(jabatan); }
+        if (pendidikan !== undefined) { fields.push('pendidikan = ?'); values.push(pendidikan); }
+        if (usia !== undefined) { fields.push('usia = ?'); values.push(usia); }
+        if (jenis_kelamin !== undefined) { fields.push('jenis_kelamin = ?'); values.push(jenis_kelamin); }
+        if (hobi !== undefined) { fields.push('hobi = ?'); values.push(hobi); }
+        if (pilihan_jenis_lagu !== undefined) { fields.push('pilihan_jenis_lagu = ?'); values.push(pilihan_jenis_lagu); }
+        if (alat_transportasi !== undefined) { fields.push('alat_transportasi = ?'); values.push(alat_transportasi); }
+        if (range_harga_gadget !== undefined) { fields.push('range_harga_gadget = ?'); values.push(range_harga_gadget); }
+        if (radio_sering_diputar !== undefined) { fields.push('radio_sering_diputar = ?'); values.push(radio_sering_diputar); }
+        if (acara_radio_favorit !== undefined) { fields.push('acara_radio_favorit = ?'); values.push(acara_radio_favorit); }
+        if (objek_wisata_favorit !== undefined) { fields.push('objek_wisata_favorit = ?'); values.push(objek_wisata_favorit); }
+        if (tv_sering_ditonton !== undefined) { fields.push('tv_sering_ditonton = ?'); values.push(tv_sering_ditonton); }
+        if (acara_tv_favorit !== undefined) { fields.push('acara_tv_favorit = ?'); values.push(acara_tv_favorit); }
 
         if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
 

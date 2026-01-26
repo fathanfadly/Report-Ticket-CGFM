@@ -74,10 +74,11 @@ const StatusResolutionModal = ({ isOpen, onClose, onConfirm, ticketTitle, mode }
                         </button>
                         <button
                             type="submit"
+                            disabled={!reason.trim()}
                             className={`flex-1 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all ${isSolved
-                                    ? 'bg-green-600 shadow-green-200 hover:bg-green-700'
-                                    : 'bg-red-600 shadow-red-200 hover:bg-red-700'
-                                }`}
+                                ? 'bg-green-600 shadow-green-200 hover:bg-green-700'
+                                : 'bg-red-600 shadow-red-200 hover:bg-red-700'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {isSolved ? 'Mark as Solved' : 'Mark as Blocked'}
                         </button>

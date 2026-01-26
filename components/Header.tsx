@@ -21,7 +21,7 @@ const Header = ({ isCalendarOpen, toggleCalendar, selectedDate, onSelectDate, se
                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gray-50 shadow-sm border border-gray-100">
                         <img src="/logo.jpg" alt="CGFM Logo" className="h-full w-full object-cover" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-800">Support Ticket Tracker</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">CityGuideFM Report Tracker</h1>
                 </div>
 
                 <div className="flex items-center gap-4">

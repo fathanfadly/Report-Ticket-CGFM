@@ -5,7 +5,12 @@ import {
     DndContext,
     useDraggable,
     useDroppable,
-    DragEndEvent
+    DragEndEvent,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+    DragStartEvent,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -20,17 +25,17 @@ interface KanbanBoardProps {
 }
 
 // Draggable Ticket Wrapper
-const DraggableTicket = ({ ticket, onDelete, onSolve, onBlock, onDoubleClick }: { ticket: any, onDelete: (id: string) => void, onSolve: (id: string) => void, onBlock: (id: string) => void, onDoubleClick: (ticket: any) => void }) => {
+const DraggableTicket = ({ ticket, onDelete, onSolve, onBlock, onDoubleClick, isDragging: isOverlay }: { ticket: any, onDelete: (id: string) => void, onSolve: (id: string) => void, onBlock: (id: string) => void, onDoubleClick: (ticket: any) => void, isDragging?: boolean }) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: ticket.id,
     });
 
     const style = {
         transform: CSS.Translate.toString(transform),
-        opacity: isDragging ? 0.5 : 1,
-        // Remove direct cursor-grab here as it's now pointer on the card
+        opacity: isDragging ? 0.3 : 1,
     };
 
+    // If it's being dragged (and not the overlay), we just show a semi-transparent card as a placeholder
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
             <TicketCard {...ticket} onDelete={onDelete} onSolve={onSolve} onBlock={onBlock} onDoubleClick={onDoubleClick} />
@@ -80,7 +85,7 @@ const DroppableColumn = ({
                     </button>
                 )}
             </div>
-            <div className="flex flex-col gap-4 min-h-[500px] bg-gray-50/50 rounded-xl p-2 border border-dashed border-gray-100/50">
+            <div className="flex flex-col gap-4 max-h-[calc(100vh-220px)] overflow-y-auto overflow-x-hidden no-scrollbar bg-gray-50/50 rounded-xl p-2 border border-dashed border-gray-100/50">
                 {children}
             </div>
         </div>
@@ -88,6 +93,17 @@ const DroppableColumn = ({
 };
 
 const KanbanBoard = ({ tickets, onTicketMove, onDelete, onSolve, onBlock, onDeleteAll, onTicketClick }: KanbanBoardProps) => {
+    const [activeTicket, setActiveTicket] = React.useState<any>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 8,
+            },
+        })
+    );
+
     const columns = [
         { id: 'urgent', title: 'Urgent', color: 'bg-red-400' },
         { id: 'new', title: 'New/ Open', color: 'bg-indigo-300' },
@@ -99,18 +115,32 @@ const KanbanBoard = ({ tickets, onTicketMove, onDelete, onSolve, onBlock, onDele
         { id: 'completed', title: 'Completed', color: 'bg-green-400' },
     ];
 
+    const handleDragStart = (event: DragStartEvent) => {
+        const { active } = event;
+        const ticket = tickets.find((t) => t.id === active.id);
+        setActiveTicket(ticket);
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
+        setActiveTicket(null);
 
         if (over && active.id !== over.id) {
-            // active.id is the ticket ID
-            // over.id is the column ID
             onTicketMove(active.id as string, over.id as string);
         }
     };
 
+    const handleDragCancel = () => {
+        setActiveTicket(null);
+    };
+
     return (
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+        >
             <div className="flex h-full flex-1 overflow-x-auto overflow-y-hidden bg-white px-8 pb-8 pt-4">
                 <div className="flex gap-6 min-w-max">
                     {columns.map((column) => (
@@ -132,6 +162,23 @@ const KanbanBoard = ({ tickets, onTicketMove, onDelete, onSolve, onBlock, onDele
                     ))}
                 </div>
             </div>
+
+            <DragOverlay dropAnimation={{
+                duration: 250,
+                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+            }}>
+                {activeTicket ? (
+                    <div className="opacity-90 scale-105 transition-transform cursor-grabbing">
+                        <TicketCard
+                            {...activeTicket}
+                            onDelete={() => { }}
+                            onSolve={() => { }}
+                            onBlock={() => { }}
+                            onDoubleClick={() => { }}
+                        />
+                    </div>
+                ) : null}
+            </DragOverlay>
         </DndContext>
     );
 };
