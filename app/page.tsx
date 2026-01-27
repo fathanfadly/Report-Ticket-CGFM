@@ -53,12 +53,34 @@ export default function Home() {
   });
 
   const handleAddTicket = async (newTicket: any) => {
+    let finalImageUrl = newTicket.image_url;
+
+    // Logic for image upload if file is provided
+    if (newTicket.file) {
+      const formData = new FormData();
+      formData.append('file', newTicket.file);
+      try {
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadRes.ok) {
+          finalImageUrl = uploadData.url;
+        }
+      } catch (err) {
+        console.error("Upload failed", err);
+      }
+    }
+
     const ticketWithId = {
       ...newTicket,
       id: Math.random().toString(36).substr(2, 9),
       iso_date: new Date().toISOString().split('T')[0],
-      date_range: "Recently added"
+      date_range: "Recently added",
+      image_url: finalImageUrl,
     };
+    delete ticketWithId.file;
 
     try {
       const res = await fetch('/api/tickets', {
@@ -68,9 +90,14 @@ export default function Home() {
       });
       if (res.ok) {
         setTickets(prev => [ticketWithId, ...prev]);
+        setIsAddTicketOpen(false);
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Add failed");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Add failed:", error);
+      alert("Add failed: " + error.message);
     }
   };
 
