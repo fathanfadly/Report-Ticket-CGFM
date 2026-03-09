@@ -25,15 +25,15 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const { content, activity_type = 'comment' } = await request.json();
+        const { content, activity_type = 'comment', ticket_status } = await request.json();
 
         if (!content) {
             return NextResponse.json({ error: 'Content is required' }, { status: 400 });
         }
 
         const [result]: any = await pool.query(
-            'INSERT INTO Ticket_Activities (ticket_id, content, activity_type) VALUES (?, ?, ?)',
-            [id, content, activity_type]
+            'INSERT INTO Ticket_Activities (ticket_id, content, activity_type, ticket_status) VALUES (?, ?, ?, ?)',
+            [id, content, activity_type, ticket_status]
         );
 
         const [newActivity] = await pool.query<RowDataPacket[]>(

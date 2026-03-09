@@ -258,7 +258,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Tipe Pelapor</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Tipe Pelapor<span className="text-red-500"> *</span></label>
                                 <select
                                     required
                                     value={tipePelapor}
@@ -274,7 +274,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Nama Pelapor</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Nama Pelapor<span className="text-red-500"> *</span></label>
                                 <input
                                     type="text"
                                     required
@@ -286,7 +286,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">No HP</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">No HP<span className="text-red-500"> *</span></label>
                                 <input
                                     type="tel"
                                     value={nomorTelepon}
@@ -297,7 +297,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Pekerjaan</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Pekerjaan<span className="text-red-500"> *</span></label>
                                 <select
                                     value={pekerjaan}
                                     onChange={(e) => setPekerjaan(e.target.value)}
@@ -313,7 +313,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Alamat</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Alamat<span className="text-red-500"> *</span></label>
                                 <textarea
                                     value={alamat}
                                     onChange={(e) => setAlamat(e.target.value)}
@@ -336,7 +336,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Kode Broadcaster</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Kode Broadcaster<span className="text-red-500"> *</span></label>
                                 <select
                                     value={kodeBroadcaster}
                                     onChange={(e) => setKodeBroadcaster(e.target.value)}
@@ -350,7 +350,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Judul Laporan</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Judul Laporan<span className="text-red-500"> *</span></label>
                                 <input
                                     type="text"
                                     required
@@ -362,7 +362,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Kategori Laporan</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Kategori Laporan<span className="text-red-500"> *</span></label>
                                 <select
                                     required
                                     value={kategoriLaporan}
@@ -379,7 +379,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Sumber Laporan</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Sumber Laporan<span className="text-red-500"> *</span></label>
                                 <select
                                     required
                                     value={sumberLaporan}
@@ -395,7 +395,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Priority</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Priority<span className="text-red-500"> *</span></label>
                                 <select
                                     value={priority}
                                     onChange={(e) => setPriority(e.target.value)}
@@ -408,7 +408,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Initial Status</label>
+                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Initial Status<span className="text-red-500"> *</span></label>
                                 <select
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value)}

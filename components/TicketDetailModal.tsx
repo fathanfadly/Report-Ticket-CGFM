@@ -47,7 +47,10 @@ const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit, onCommentAdded }: 
             const response = await fetch(`/api/tickets/${ticket.id}/activities`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: newComment }),
+                body: JSON.stringify({
+                    content: newComment,
+                    ticket_status: ticket.status
+                }),
             });
 
             if (response.ok) {
@@ -220,7 +223,29 @@ const TicketDetailModal = ({ isOpen, onClose, ticket, onEdit, onCommentAdded }: 
                                                         <div className="flex flex-col gap-1 flex-1">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-xs font-bold text-gray-700">Sistem / Admin</span>
-                                                                <span className="text-[10px] text-gray-400 font-medium">
+                                                                {activity.ticket_status && (
+                                                                    <span className={clsx(
+                                                                        "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider",
+                                                                        activity.ticket_status === 'urgent' ? "bg-red-50 text-red-600 border border-red-100" :
+                                                                            activity.ticket_status === 'new' ? "bg-indigo-50 text-indigo-600 border border-indigo-100" :
+                                                                                activity.ticket_status === 'assessment' ? "bg-purple-50 text-purple-600 border border-purple-100" :
+                                                                                    activity.ticket_status === 'backlog' ? "bg-slate-100 text-slate-600 border border-slate-200" :
+                                                                                        activity.ticket_status === 'progress' ? "bg-pink-50 text-pink-600 border border-pink-100" :
+                                                                                            activity.ticket_status === 'pending' ? "bg-yellow-50 text-yellow-600 border border-yellow-200" :
+                                                                                                activity.ticket_status === 'completed' ? "bg-green-50 text-green-600 border border-green-100" :
+                                                                                                    activity.ticket_status === 'blocked' ? "bg-red-50 text-red-600 border border-red-100" :
+                                                                                                        "bg-gray-50 text-gray-600 border border-gray-100"
+                                                                    )}>
+                                                                        {activity.ticket_status === 'urgent' ? 'Urgent' :
+                                                                            activity.ticket_status === 'new' ? 'New/ Open' :
+                                                                                activity.ticket_status === 'assessment' ? 'Assessment' :
+                                                                                    activity.ticket_status === 'backlog' ? 'Backlog' :
+                                                                                        activity.ticket_status === 'progress' ? 'In Progress' :
+                                                                                            activity.ticket_status === 'pending' ? 'Pending Input' :
+                                                                                                activity.ticket_status}
+                                                                    </span>
+                                                                )}
+                                                                <span className="text-[10px] text-gray-400 font-medium ml-auto">
                                                                     {format(parseISO(activity.created_at), 'MMM d, h:mm aa')}
                                                                 </span>
                                                             </div>
