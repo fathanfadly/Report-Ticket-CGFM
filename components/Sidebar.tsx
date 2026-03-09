@@ -23,9 +23,15 @@ const Sidebar = () => {
                     >
                         <Home className="h-6 w-6" />
                     </Link>
-                    <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all">
+                    <Link
+                        href="/dashboard"
+                        className={clsx(
+                            "p-2 rounded-xl transition-all",
+                            pathname === '/dashboard' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
+                        )}
+                    >
                         <BarChart2 className="h-6 w-6" />
-                    </button>
+                    </Link>
                     <Link
                         href="/reporters"
                         className={clsx(
