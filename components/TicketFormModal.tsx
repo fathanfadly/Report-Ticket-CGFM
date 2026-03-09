@@ -270,6 +270,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                                     <option value="Polisi">Polisi</option>
                                     <option value="Instansi">Instansi</option>
                                     <option value="Internal">Internal</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 

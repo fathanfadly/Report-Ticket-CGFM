@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Phone, Briefcase, MapPin, Radio } from 'lucide-react';
 
-interface Reporter {
+interface Broadcaster {
     id: number;
     nama: string;
     tipe_pelapor: string;
@@ -25,11 +25,11 @@ interface Reporter {
     acara_tv_favorit?: string;
 }
 
-interface ReporterEditModalProps {
+interface BroadcasterEditModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (id: number, data: any) => void;
-    reporter: Reporter | null;
+    broadcaster: Broadcaster | null;
 }
 
 const InputField = ({ label, value, onChange, type = "text", placeholder = "", required = false }: any) => (
@@ -46,7 +46,7 @@ const InputField = ({ label, value, onChange, type = "text", placeholder = "", r
     </div>
 );
 
-const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditModalProps) => {
+const BroadcasterEditModal = ({ isOpen, onClose, onSave, broadcaster }: BroadcasterEditModalProps) => {
     // Basic Info
     const [name, setName] = useState('');
     const [type, setType] = useState('');
@@ -72,40 +72,60 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        if (reporter) {
-            setName(reporter.nama || '');
-            setType(reporter.tipe_pelapor || 'Personal');
-            setPhone(reporter.no_hp || '');
-            setJob(reporter.pekerjaan || '');
-            setAddress(reporter.alamat || '');
+        if (broadcaster) {
+            setName(broadcaster.nama || '');
+            setType(broadcaster.tipe_pelapor || 'Broadcaster');
+            setPhone(broadcaster.no_hp || '');
+            setJob(broadcaster.pekerjaan || '');
+            setAddress(broadcaster.alamat || '');
 
-            setJabatan(reporter.jabatan || '');
-            setPendidikan(reporter.pendidikan || '');
-            setUsia(reporter.usia || '');
-            setJenisKelamin(reporter.jenis_kelamin || '');
-            setHobi(reporter.hobi || '');
-            setJenisLagu(reporter.pilihan_jenis_lagu || '');
-            setTransportasi(reporter.alat_transportasi || '');
-            setHargaGadget(reporter.range_harga_gadget || '');
-            setRadioSering(reporter.radio_sering_diputar || '');
-            setRadioFavorit(reporter.acara_radio_favorit || '');
-            setWisataFavorit(reporter.objek_wisata_favorit || '');
-            setTvSering(reporter.tv_sering_ditonton || '');
-            setTvFavorit(reporter.acara_tv_favorit || '');
+            setJabatan(broadcaster.jabatan || '');
+            setPendidikan(broadcaster.pendidikan || '');
+            setUsia(broadcaster.usia || '');
+            setJenisKelamin(broadcaster.jenis_kelamin || '');
+            setHobi(broadcaster.hobi || '');
+            setJenisLagu(broadcaster.pilihan_jenis_lagu || '');
+            setTransportasi(broadcaster.alat_transportasi || '');
+            setHargaGadget(broadcaster.range_harga_gadget || '');
+            setRadioSering(broadcaster.radio_sering_diputar || '');
+            setRadioFavorit(broadcaster.acara_radio_favorit || '');
+            setWisataFavorit(broadcaster.objek_wisata_favorit || '');
+            setTvSering(broadcaster.tv_sering_ditonton || '');
+            setTvFavorit(broadcaster.acara_tv_favorit || '');
+        } else {
+            // Reset for "Add Mode"
+            setName('');
+            setType('Broadcaster');
+            setPhone('');
+            setJob('');
+            setAddress('');
+            setJabatan('');
+            setPendidikan('');
+            setUsia('');
+            setJenisKelamin('');
+            setHobi('');
+            setJenisLagu('');
+            setTransportasi('');
+            setHargaGadget('');
+            setRadioSering('');
+            setRadioFavorit('');
+            setWisataFavorit('');
+            setTvSering('');
+            setTvFavorit('');
         }
-    }, [reporter, isOpen]);
+    }, [broadcaster, isOpen]);
 
-    if (!isOpen || !reporter) return null;
+    if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSaving(true);
-        await onSave(reporter.id, {
-            name,
-            type,
-            phone,
-            job,
-            address,
+        await onSave(broadcaster?.id || 0, {
+            nama: name,
+            tipe_pelapor: type,
+            no_hp: phone,
+            pekerjaan: job,
+            alamat: address,
             jabatan,
             pendidikan,
             usia: usia === '' ? null : Number(usia),
@@ -129,7 +149,9 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
                 {/* Header */}
                 <header className="flex h-20 items-center justify-between border-b border-gray-100 bg-white px-8 shrink-0">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">Edit Reporter Information</h2>
+                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+                            {broadcaster ? 'Edit Broadcaster Information' : 'Add New Broadcaster'}
+                        </h2>
                         <p className="text-sm text-gray-400">Update complete profile and lifestyle data.</p>
                     </div>
                     <button onClick={onClose} className="rounded-full p-2.5 hover:bg-gray-100 text-gray-400 transition-all">
@@ -138,7 +160,7 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
                 </header>
 
                 {/* Form Content */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/20">
+                <form id="broadcaster-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/20">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
 
                         {/* Section: Basic & Personal */}
@@ -150,15 +172,15 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
                                 <InputField label="Nama Lengkap" value={name} onChange={setName} required />
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold text-gray-400 border border-gray-100 uppercase tracking-widest leading-none block">Tipe Pelapor</label>
+                                        <label className="text-[10px] font-bold text-gray-400 border border-gray-100 uppercase tracking-widest leading-none block">Tipe</label>
                                         <select
                                             value={type}
                                             onChange={(e) => setType(e.target.value)}
                                             className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
                                         >
-                                            <option value="Personal">Personal</option>
-                                            <option value="Instansi">Instansi</option>
-                                            <option value="Masyarakat">Masyarakat</option>
+                                            <option value="Broadcaster">Broadcaster</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="Team">Team</option>
                                             <option value="Other">Other</option>
                                         </select>
                                     </div>
@@ -226,12 +248,12 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
                         Cancel
                     </button>
                     <button
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
+                        form="broadcaster-form"
                         disabled={isSaving}
                         className="px-10 py-2.5 rounded-xl bg-indigo-600 text-sm font-black text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 transition-all active:scale-95"
                     >
-                        {isSaving ? 'SAVING DATA...' : 'SAVE ALL CHANGES'}
+                        {isSaving ? 'SAVING DATA...' : broadcaster ? 'SAVE ALL CHANGES' : 'ADD BROADCASTER'}
                     </button>
                 </footer>
             </div>
@@ -239,4 +261,4 @@ const ReporterEditModal = ({ isOpen, onClose, onSave, reporter }: ReporterEditMo
     );
 };
 
-export default ReporterEditModal;
+export default BroadcasterEditModal;

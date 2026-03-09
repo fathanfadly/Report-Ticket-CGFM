@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Home, BarChart2, User, Zap, Bell, Settings } from 'lucide-react';
+import { Home, BarChart2, User, Radio, Bell, Settings } from 'lucide-react';
 
 const Sidebar = () => {
     const pathname = usePathname();
@@ -35,9 +35,15 @@ const Sidebar = () => {
                     >
                         <User className="h-6 w-6" />
                     </Link>
-                    <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all">
-                        <Zap className="h-6 w-6" />
-                    </button>
+                    <Link
+                        href="/broadcasters"
+                        className={clsx(
+                            "p-2 rounded-xl transition-all",
+                            pathname === '/broadcasters' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
+                        )}
+                    >
+                        <Radio className="h-6 w-6" />
+                    </Link>
                     <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all relative">
                         <Bell className="h-6 w-6" />
                         <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
