@@ -24,6 +24,7 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
     const [isLoadingReporters, setIsLoadingReporters] = useState(false);
 
     // Section 2: Report details
+    const [broadcasters, setBroadcasters] = useState<any[]>([]);
     const [kodeBroadcaster, setKodeBroadcaster] = useState('');
     const [judulLaporan, setJudulLaporan] = useState('');
     const [priority, setPriority] = useState('P2');
@@ -158,6 +159,21 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
         setAlamat(rep.alamat || '');
         setShowSelector(false);
     };
+
+    useEffect(() => {
+        const fetchBroadcasters = async () => {
+            try {
+                const res = await fetch('/api/broadcasters?all=true');
+                const json = await res.json();
+                if (json.data) {
+                    setBroadcasters(json.data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch broadcasters', err);
+            }
+        };
+        fetchBroadcasters();
+    }, []);
 
     if (!isOpen) return null;
 
@@ -344,9 +360,11 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                                     className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                                 >
                                     <option value="">Pilih Broadcaster</option>
-                                    <option value="BC001">BC001 - Syam</option>
-                                    <option value="BC002">BC002 - Dio</option>
-                                    <option value="BC003">BC003 - Andre</option>
+                                    {broadcasters.map((b) => (
+                                        <option key={b.broadcaster_code} value={b.broadcaster_code}>
+                                            {b.broadcaster_code} - {b.broadcaster_name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
