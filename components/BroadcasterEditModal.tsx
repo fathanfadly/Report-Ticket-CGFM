@@ -90,7 +90,7 @@ const BroadcasterEditModal = ({ isOpen, onClose, onSave, broadcaster }: Broadcas
                             value={code}
                             onChange={setCode}
                             required
-                            placeholder="e.g. RN"
+                            placeholder="e.g. BC"
                         />
 
                         <InputField
@@ -98,7 +98,7 @@ const BroadcasterEditModal = ({ isOpen, onClose, onSave, broadcaster }: Broadcas
                             value={name}
                             onChange={setName}
                             required
-                            placeholder="e.g. Raffi Naufal"
+                            placeholder="e.g. Syam"
                         />
 
                         <div className="space-y-1.5">
