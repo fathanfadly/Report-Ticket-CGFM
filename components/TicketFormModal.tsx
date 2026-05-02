@@ -120,6 +120,17 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile) {
+            // Check if file size exceeds 2MB (2 * 1024 * 1024 bytes)
+            if (selectedFile.size > 2 * 1024 * 1024) {
+                alert('File size exceeds 2MB. Please upload a smaller image.');
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                setFile(null);
+                setPreview(null);
+                return;
+            }
+
             setFile(selectedFile);
             setImageUrl('');
             const reader = new FileReader();
@@ -470,7 +481,10 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             )}
 
                             <div className="md:col-span-2">
-                                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Attachment (Image)</label>
+                                <label className="mb-1.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-500">
+                                    <span>Attachment (Image)</span>
+                                    <span className="text-[10px] text-red-500 font-normal normal-case italic">* Max Attachment file 2MB</span>
+                                </label>
                                 <div className="space-y-3">
                                     <input
                                         type="text"
