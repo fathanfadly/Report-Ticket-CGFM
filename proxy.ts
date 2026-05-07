@@ -8,7 +8,7 @@ const secretKey = new TextEncoder().encode(
 
 const PUBLIC_FILE = /\.(.*)$/;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Ignore static files, api routes (except protected ones if needed), next internals
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
 }
 
-// Specify the paths where this middleware should run
+// Specify the paths where this proxy should run
 export const config = {
     matcher: [
         /*
