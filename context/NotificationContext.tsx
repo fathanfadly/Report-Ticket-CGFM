@@ -14,6 +14,11 @@ export interface Notification {
     initials?: string;
     category: 'reporter' | 'broadcaster' | 'system' | 'alert';
     ticket_id?: string;
+    ticket_status?: string;
+    created_by_name?: string;
+    created_by_code?: string;
+    user_role?: string;
+    activity_type?: string;
 }
 
 interface NotificationContextType {
@@ -73,6 +78,11 @@ function mapRowToNotification(row: any): Notification {
         initials: getInitials(title),
         category: getCategory(row.kategori_laporan, row.kode_broadcaster),
         ticket_id: row.ticket_id,
+        ticket_status: row.ticket_status,
+        created_by_name: row.created_by_name,
+        created_by_code: row.created_by_code,
+        user_role: row.user_role,
+        activity_type: row.activity_type,
     };
 }
 
@@ -80,8 +90,23 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [readIds, setReadIds] = useState<Set<string>>(new Set());
+    const [readIds, setReadIds] = useState<Set<string>>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem('notification_read_ids');
+                if (stored) return new Set(JSON.parse(stored));
+            } catch {}
+        }
+        return new Set();
+    });
     const [isLoading, setIsLoading] = useState(true);
+
+    // Persist readIds to localStorage whenever they change
+    useEffect(() => {
+        try {
+            localStorage.setItem('notification_read_ids', JSON.stringify([...readIds]));
+        } catch {}
+    }, [readIds]);
 
     const fetchNotifications = async () => {
         try {

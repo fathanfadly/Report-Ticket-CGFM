@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import { getAuthenticatedUser } from '@/lib/authHelper';
 
 export async function GET() {
     try {
@@ -75,6 +76,13 @@ export async function POST(request: Request) {
             [id, judul_laporan, priority, status, date_range, iso_date, likes || 0, image_url, JSON.stringify(tags || []), description || null, reporter_id_to_use, kode_broadcaster, sumber_laporan, kategori_laporan]
         );
 
+        // 3. Log ticket creation as an activity for notifications
+        const user = await getAuthenticatedUser();
+        await pool.query(
+            'INSERT INTO ticket_activities (ticket_id, content, activity_type, ticket_status, created_by_name, created_by_code, user_role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id, `New ticket created: ${judul_laporan}`, 'ticket_created', status || 'new', user.created_by_name, user.created_by_code, user.user_role]
+        );
+
         return NextResponse.json({ success: true, id });
     } catch (error: any) {
         console.error("POST error:", error);
@@ -96,8 +104,9 @@ export async function PATCH(request: Request) {
         }
 
         // Helper to find existing ticket and its reporter_id
-        const [rows] = await pool.query<RowDataPacket[]>('SELECT reporter_id FROM tickets WHERE id = ? UNION SELECT reporter_id FROM completed_tickets WHERE id = ?', [id, id]);
+        const [rows] = await pool.query<RowDataPacket[]>('SELECT reporter_id, status FROM tickets WHERE id = ? UNION SELECT reporter_id, status FROM completed_tickets WHERE id = ?', [id, id]);
         const reporter_id = rows.length > 0 ? rows[0].reporter_id : null;
+        const oldStatus = rows.length > 0 ? rows[0].status : null;
 
         // 1. Update Reporter Info if reporter_id exists and data provided
         if (reporter_id && (tipe_pelapor || nama_pelapor || no_hp || pekerjaan || alamat)) {
@@ -141,6 +150,19 @@ export async function PATCH(request: Request) {
                     ]
                 );
                 await pool.query('DELETE FROM tickets WHERE id = ?', [id]);
+
+                // Auto-log status change to completed/blocked with solution
+                if (status !== oldStatus) {
+                    const user = await getAuthenticatedUser();
+                    const activityContent = solution 
+                        ? `Status updated to ${status}. Resolution: ${solution}`
+                        : `Status updated to ${status}`;
+                    await pool.query(
+                        'INSERT INTO ticket_activities (ticket_id, content, activity_type, ticket_status, created_by_name, created_by_code, user_role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [id, activityContent, 'status_change', status, user.created_by_name, user.created_by_code, user.user_role]
+                    );
+                }
+
                 return NextResponse.json({ success: true });
             }
         }
@@ -175,6 +197,16 @@ export async function PATCH(request: Request) {
         if (updateFields.length > 0) {
             updateValues.push(id);
             await pool.query(`UPDATE ${tableName} SET ${updateFields.join(', ')} WHERE id = ?`, updateValues);
+        }
+
+        // Auto-log intermediate status transitions
+        if (status !== undefined && oldStatus !== null && status !== oldStatus) {
+            const user = await getAuthenticatedUser();
+            const activityContent = `Status updated to ${status}`;
+            await pool.query(
+                'INSERT INTO ticket_activities (ticket_id, content, activity_type, ticket_status, created_by_name, created_by_code, user_role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [id, activityContent, 'status_change', status, user.created_by_name, user.created_by_code, user.user_role]
+            );
         }
 
         return NextResponse.json({ success: true });

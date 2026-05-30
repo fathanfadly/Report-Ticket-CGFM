@@ -33,9 +33,6 @@ function getAvatarColor(id: string) {
 }
 
 function NotificationCard({ n, onRead, onDelete }: { n: Notification; onRead: () => void; onDelete: () => void }) {
-    const cfg = typeConfig[n.type];
-    const Icon = cfg.icon;
-
     return (
         <div className={clsx(
             'group relative flex items-start gap-4 p-4 rounded-2xl border transition-all duration-200',
@@ -55,19 +52,47 @@ function NotificationCard({ n, onRead, onDelete }: { n: Notification; onRead: ()
                     <p className={clsx('text-sm font-semibold', n.read ? 'text-gray-700' : 'text-gray-900')}>
                         {n.title}
                     </p>
-                    <span className={clsx('text-[11px] font-medium px-2 py-0.5 rounded-full', categoryColors[n.category])}>
-                        {n.category}
+                    <span className={clsx(
+                        'text-[11px] font-bold px-2 py-0.5 rounded-full',
+                        n.user_role === 'superadmin' ? 'bg-indigo-100 text-indigo-700' : 
+                        n.user_role === 'broadcaster' ? 'bg-purple-100 text-purple-700' :
+                        categoryColors[n.category] || 'bg-gray-100 text-gray-600'
+                    )}>
+                        {n.user_role === 'superadmin' ? 'superadmin' :
+                         n.user_role === 'broadcaster' ? (n.created_by_name ? `${n.created_by_name} (${n.created_by_code})` : `broadcaster (${n.created_by_code})`) :
+                         n.category}
                     </span>
                     {n.ticket_id && (
                         <span className="text-[11px] text-gray-400 font-mono">#{n.ticket_id}</span>
                     )}
                 </div>
+
                 <p className="text-sm text-gray-500 leading-snug">{n.message}</p>
-                <div className="mt-2 flex items-center gap-3">
-                    <span className={clsx('inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border', cfg.bg, cfg.text, cfg.border)}>
-                        <Icon className="h-3 w-3" />
-                        {n.type}
-                    </span>
+                <div className="mt-2 flex items-center gap-3 flex-wrap">
+                    {n.ticket_status && (
+                        <span className={clsx(
+                            'text-[11px] font-bold px-2 py-0.5 rounded-full border',
+                            n.ticket_status === 'urgent'     ? 'bg-red-50 text-red-600 border-red-200' :
+                            n.ticket_status === 'new'        ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
+                            n.ticket_status === 'assessment' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                            n.ticket_status === 'backlog'    ? 'bg-slate-100 text-slate-600 border-slate-200' :
+                            n.ticket_status === 'progress'   ? 'bg-pink-50 text-pink-600 border-pink-200' :
+                            n.ticket_status === 'pending'    ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
+                            n.ticket_status === 'completed'  ? 'bg-green-50 text-green-600 border-green-200' :
+                            n.ticket_status === 'blocked'    ? 'bg-red-50 text-red-700 border-red-200' :
+                                                               'bg-gray-50 text-gray-600 border-gray-200'
+                        )}>
+                            {n.ticket_status === 'urgent'     ? '🔴 Urgent' :
+                             n.ticket_status === 'new'        ? '🔵 New / Open' :
+                             n.ticket_status === 'assessment' ? '🟣 Assessment' :
+                             n.ticket_status === 'backlog'    ? '⚫ Backlog' :
+                             n.ticket_status === 'progress'   ? '🟠 In Progress' :
+                             n.ticket_status === 'pending'    ? '🟡 Pending Input' :
+                             n.ticket_status === 'completed'  ? '🟢 Completed' :
+                             n.ticket_status === 'blocked'    ? '🔴 Blocked' :
+                              n.ticket_status}
+                        </span>
+                    )}
                     <span className="text-xs text-gray-400">{n.time}</span>
                 </div>
             </div>

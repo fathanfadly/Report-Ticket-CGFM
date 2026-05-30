@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import { getAuthenticatedUser } from '@/lib/authHelper';
 
 export async function GET(
     request: Request,
@@ -31,9 +32,11 @@ export async function POST(
             return NextResponse.json({ error: 'Content is required' }, { status: 400 });
         }
 
+        const user = await getAuthenticatedUser();
+
         const [result]: any = await pool.query(
-            'INSERT INTO ticket_activities (ticket_id, content, activity_type, ticket_status) VALUES (?, ?, ?, ?)',
-            [id, content, activity_type, ticket_status]
+            'INSERT INTO ticket_activities (ticket_id, content, activity_type, ticket_status, created_by_name, created_by_code, user_role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id, content, activity_type, ticket_status, user.created_by_name, user.created_by_code, user.user_role]
         );
 
         const [newActivity] = await pool.query<RowDataPacket[]>(
@@ -42,8 +45,9 @@ export async function POST(
         );
 
         return NextResponse.json(newActivity[0]);
-   } catch (error: any) {
-    console.error('Activities POST error:', error.message); // ← tambah ini
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: any) {
+        console.error('Activities POST error:', error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }   
 }
+

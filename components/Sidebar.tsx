@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { Home, BarChart2, User, Radio, Bell, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNotifications } from '@/context/NotificationContext';
 
 const Sidebar = () => {
     const pathname = usePathname();
@@ -12,6 +13,7 @@ const Sidebar = () => {
     const [role, setRole] = useState<string | null>(null);
     const [username, setUsername] = useState<string>('U');
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const { unreadCount } = useNotifications();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -90,12 +92,22 @@ const Sidebar = () => {
                             </Link>
                         )}
 
-                        <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition-all relative">
+                        <Link
+                            href="/notifications"
+                            className={clsx(
+                                "p-2 rounded-xl transition-all relative",
+                                pathname === '/notifications' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
+                            )}
+                            title="Notifications"
+                        >
                             <Bell className="h-6 w-6" />
-                            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                        </button>
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
+                            )}
+                        </Link>
                     </nav>
                 </div>
+
 
                 <div className="flex flex-col items-center gap-6">
                     <button onClick={() => setShowLogoutModal(true)} title="Logout" className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">

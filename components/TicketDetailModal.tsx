@@ -33,6 +33,10 @@ interface Activity {
     content: string;
     ticket_status?: string;
     created_at: string;
+    created_by_name?: string;
+    created_by_code?: string;
+    user_role?: string;
+    activity_type?: string;
 }
 
 interface TicketDetailModalProps {
@@ -298,7 +302,13 @@ const TicketDetailModal: React.FC<TicketDetailModalProps> = ({
                                                             </div>
                                                             <div className="flex flex-col gap-1 flex-1">
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="text-xs font-bold text-gray-700">Sistem / Admin</span>
+                                                                    <span className="text-xs font-bold text-gray-700">
+                                                                        {activity.created_by_name ? (
+                                                                            activity.user_role === 'superadmin' 
+                                                                                ? 'Superadmin' 
+                                                                                : `${activity.created_by_name} (${activity.created_by_code})`
+                                                                        ) : 'Sistem / Admin'}
+                                                                    </span>
                                                                     {activity.ticket_status && (
                                                                         <span className={clsx(
                                                                             "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider",

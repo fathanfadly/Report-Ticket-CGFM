@@ -14,6 +14,10 @@ export interface Notification {
     initials?: string;
     category: 'reporter' | 'broadcaster' | 'system' | 'alert';
     ticket_id?: string;
+    created_by_name?: string;
+    created_by_code?: string;
+    user_role?: string;
+    activity_type?: string;
 }
 
 interface NotificationContextType {
@@ -73,6 +77,10 @@ function mapRowToNotification(row: any): Notification {
         initials: getInitials(title),
         category: getCategory(row.kategori_laporan, row.kode_broadcaster),
         ticket_id: row.ticket_id,
+        created_by_name: row.created_by_name,
+        created_by_code: row.created_by_code,
+        user_role: row.user_role,
+        activity_type: row.activity_type,
     };
 }
 
