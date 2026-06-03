@@ -137,8 +137,36 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const markAsRead = (id: string) => setReadIds((prev) => new Set([...prev, id]));
     const markAllAsRead = () => setReadIds(new Set(notifications.map((n) => n.id)));
-    const deleteNotification = (id: string) => setNotifications((prev) => prev.filter((n) => n.id !== id));
-    const clearAll = () => { setNotifications([]); setReadIds(new Set()); };
+    const deleteNotification = async (id: string) => {
+        const previousNotifications = notifications;
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        try {
+            const res = await fetch(`/api/notifications?id=${id}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Failed to delete notification');
+        } catch (err) {
+            console.error('Error deleting notification:', err);
+            setNotifications(previousNotifications);
+        }
+    };
+
+    const clearAll = async () => {
+        const previousNotifications = notifications;
+        const previousReadIds = readIds;
+        setNotifications([]);
+        setReadIds(new Set());
+        try {
+            const res = await fetch('/api/notifications?all=true', {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Failed to clear notifications');
+        } catch (err) {
+            console.error('Error clearing notifications:', err);
+            setNotifications(previousNotifications);
+            setReadIds(previousReadIds);
+        }
+    };
 
     return (
         <NotificationContext.Provider

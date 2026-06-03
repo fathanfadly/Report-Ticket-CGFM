@@ -45,3 +45,26 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        const all = searchParams.get('all');
+
+        if (all === 'true') {
+            await pool.query('DELETE FROM ticket_activities');
+            return NextResponse.json({ success: true, cleared: true });
+        }
+
+        if (!id) {
+            return NextResponse.json({ error: 'Missing ID or all parameter' }, { status: 400 });
+        }
+
+        await pool.query('DELETE FROM ticket_activities WHERE id = ?', [id]);
+        return NextResponse.json({ success: true, deleted: id });
+    } catch (error: any) {
+        console.error('Notifications DELETE error:', error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
