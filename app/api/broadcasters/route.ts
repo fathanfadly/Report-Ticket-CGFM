@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket } from 'mysql2';
+import bcrypt from 'bcryptjs';
 
 export async function GET(request: Request) {
     try {
@@ -59,9 +60,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const [result]: any = await pool.query(
             `INSERT INTO Broadcasters_Info (broadcaster_code, broadcaster_name, password) VALUES (?, ?, ?)`,
-            [broadcaster_code, broadcaster_name, password]
+            [broadcaster_code, broadcaster_name, hashedPassword]
         );
 
         return NextResponse.json({ success: true, id: result.insertId });
@@ -85,7 +88,11 @@ export async function PATCH(request: Request) {
 
         if (broadcaster_code !== undefined) { fields.push('broadcaster_code = ?'); values.push(broadcaster_code); }
         if (broadcaster_name !== undefined) { fields.push('broadcaster_name = ?'); values.push(broadcaster_name); }
-        if (password !== undefined && password !== '') { fields.push('password = ?'); values.push(password); }
+        if (password !== undefined && password !== '') {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            fields.push('password = ?');
+            values.push(hashedPassword);
+        }
 
         if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
 
