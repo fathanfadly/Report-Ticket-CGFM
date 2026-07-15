@@ -291,18 +291,16 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-white font-sans text-gray-900">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          isCalendarOpen={isCalendarOpen}
-          toggleCalendar={() => setIsCalendarOpen(!isCalendarOpen)}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onAddTicketClick={() => setIsAddTicketOpen(true)}
-        />
+    <>
+      <Header
+        isCalendarOpen={isCalendarOpen}
+        toggleCalendar={() => setIsCalendarOpen(!isCalendarOpen)}
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onAddTicketClick={() => setIsAddTicketOpen(true)}
+      />
 
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -342,7 +340,6 @@ export default function Home() {
           onConfirm={handleResolutionConfirm}
           mode={resolutionMode}
         />
-      </div>
-    </div>
+    </>
   );
 }

@@ -2,8 +2,15 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import pool from './db';
 
+const jwtSecretEnv = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !jwtSecretEnv) {
+    console.error("CRITICAL: JWT_SECRET is not set in production. This is a severe security vulnerability.");
+    // In a strict environment, you might want to throw an error here to prevent the app from starting:
+    // throw new Error("JWT_SECRET is required in production");
+}
+
 const secretKey = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback-secret-key-for-cgfm-dev'
+    jwtSecretEnv || 'fallback-secret-key-for-cgfm-dev'
 );
 
 export interface AuthenticatedUser {

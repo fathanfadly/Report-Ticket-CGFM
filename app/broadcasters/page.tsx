@@ -128,15 +128,13 @@ export default function BroadcastersPage() {
     };
 
     return (
-        <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-            <Sidebar />
+        <>
             <BroadcasterEditModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 onSave={handleSave}
                 broadcaster={selectedBroadcaster}
             />
-            <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
                 <header className="flex h-20 items-center justify-between border-b border-gray-100 bg-white px-8 shrink-0">
                     <div className="flex items-center gap-4">
@@ -299,7 +297,6 @@ export default function BroadcastersPage() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
+        </>
     );
 }

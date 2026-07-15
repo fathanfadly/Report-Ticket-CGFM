@@ -167,8 +167,7 @@ export default function ReportersPage() {
     };
 
     return (
-        <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-            <Sidebar />
+        <>
             <ReporterEditModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -184,7 +183,6 @@ export default function ReportersPage() {
                 }}
                 reporter={selectedReporter}
             />
-            <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
                 <header className="flex h-20 items-center justify-between border-b border-gray-100 bg-white px-8 shrink-0">
                     <div className="flex items-center gap-4">
@@ -348,7 +346,6 @@ export default function ReportersPage() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
+        </>
     );
 }

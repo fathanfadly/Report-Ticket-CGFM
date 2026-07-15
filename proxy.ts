@@ -11,25 +11,34 @@ const PUBLIC_FILE = /\.(.*)$/;
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Ignore static files, api routes (except protected ones if needed), next internals
+    // Ignore static files, next internals
     if (
         pathname.startsWith('/_next') ||
-        pathname.startsWith('/api') ||
         pathname.startsWith('/static') ||
         PUBLIC_FILE.test(pathname)
     ) {
-        // Exclude specific protected API routes if needed, but for now we let API routes handle their own auth
         return NextResponse.next();
     }
 
+    const isApiRoute = pathname.startsWith('/api');
     const token = request.cookies.get('token')?.value;
 
-    // If no token and trying to access anything other than login, redirect to login
+    // 1. Unauthenticated users handling
     if (!token && pathname !== '/login') {
-        const loginUrl = new URL('/login', request.url);
-        return NextResponse.redirect(loginUrl);
+        if (isApiRoute) {
+            // Unauthenticated API request
+            return new NextResponse(
+                JSON.stringify({ error: 'Unauthorized. Token missing or invalid.' }),
+                { status: 401, headers: { 'content-type': 'application/json' } }
+            );
+        } else {
+            // Unauthenticated Page request
+            const loginUrl = new URL('/login', request.url);
+            return NextResponse.redirect(loginUrl);
+        }
     }
 
+    // 2. Authenticated users handling
     if (token) {
         try {
             const verified = await jwtVerify(token, secretKey);
@@ -40,19 +49,28 @@ export async function proxy(request: NextRequest) {
                 return NextResponse.redirect(new URL('/', request.url));
             }
 
-            // Role-Based Access Control
+            // Role-Based Access Control (RBAC)
             if (role === 'admin') {
-                // Admins (broadcasters) cannot access /broadcasters (superadmin only)
+                // Admins (broadcasters) cannot access /broadcasters page
                 if (pathname.startsWith('/broadcasters')) {
                     return NextResponse.redirect(new URL('/', request.url));
+                }
+                
+                // Admins (broadcasters) cannot access /api/broadcasters (except maybe GET, but for now we block all)
+                if (pathname.startsWith('/api/broadcasters')) {
+                    return new NextResponse(
+                        JSON.stringify({ error: 'Forbidden. Superadmin access required.' }),
+                        { status: 403, headers: { 'content-type': 'application/json' } }
+                    );
                 }
             }
 
         } catch (err) {
             // Invalid token
-            const loginUrl = new URL('/login', request.url);
-            // Clear the invalid cookie
-            const response = NextResponse.redirect(loginUrl);
+            const response = isApiRoute 
+                ? new NextResponse(JSON.stringify({ error: 'Unauthorized. Token invalid or expired.' }), { status: 401, headers: { 'content-type': 'application/json' } })
+                : NextResponse.redirect(new URL('/login', request.url));
+            
             response.cookies.delete('token');
             return response;
         }
@@ -61,16 +79,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
 }
 
-// Specify the paths where this proxy should run
+// Specify the paths where this middleware should run
 export const config = {
     matcher: [
         /*
          * Match all request paths except for the ones starting with:
-         * - api/auth (auth endpoints)
+         * - api/auth/login (public auth endpoint)
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
          */
-        '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+        '/((?!api/auth/login|_next/static|_next/image|favicon.ico).*)',
     ],
 };

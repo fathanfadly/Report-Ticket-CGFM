@@ -133,9 +133,7 @@ export default function NotificationsPage() {
     });
 
     return (
-        <div className="flex h-screen bg-white font-sans text-gray-900">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
+        <>
                 <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
                     <div className="mx-auto max-w-2xl">
 
@@ -231,7 +229,6 @@ export default function NotificationsPage() {
 
                     </div>
                 </div>
-            </div>
-        </div>
+        </>
     );
 }

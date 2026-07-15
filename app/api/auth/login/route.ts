@@ -11,8 +11,13 @@ const rateLimitStore = new Map<string, { count: number, resetTime: number }>();
 const RATE_LIMIT_MAX_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
+const jwtSecretEnv = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !jwtSecretEnv) {
+    console.error("CRITICAL: JWT_SECRET is not set in production. This is a severe security vulnerability.");
+}
+
 const secretKey = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback-secret-key-for-cgfm-dev'
+    jwtSecretEnv || 'fallback-secret-key-for-cgfm-dev'
 );
 
 export async function POST(req: Request) {

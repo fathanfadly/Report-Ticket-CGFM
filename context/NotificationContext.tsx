@@ -111,7 +111,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const fetchNotifications = async () => {
         try {
             const res = await fetch('/api/notifications');
-            if (!res.ok) throw new Error('Failed to fetch');
+            if (res.status === 401) {
+                setNotifications([]);
+                return;
+            }
+            if (!res.ok) throw new Error('Failed to fetch notifications');
             const rows = await res.json();
             const mapped: Notification[] = rows.map(mapRowToNotification);
             setNotifications(mapped);

@@ -99,11 +99,8 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-            <Sidebar />
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
+        <>
+            {/* Header */}
                 <header className="flex h-20 items-center justify-between border-b border-gray-100 bg-white px-8 shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xl shadow-indigo-100 animate-in zoom-in-0 duration-500">
@@ -309,8 +306,7 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
+        </>
     );
 }
 
