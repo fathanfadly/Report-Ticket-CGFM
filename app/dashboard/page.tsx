@@ -29,9 +29,14 @@ export default function DashboardPage() {
         try {
             const res = await fetch('/api/dashboard/stats');
             const data = await res.json();
-            setStats(data);
-        } catch (error) {
+            if (res.ok && !data.error) {
+                setStats(data);
+            } else {
+                setStats({ hasError: true, message: data.error || data.message || "Unknown API Error" });
+            }
+        } catch (error: any) {
             console.error("Failed to fetch dashboard stats:", error);
+            setStats({ hasError: true, message: error.message });
         } finally {
             setIsLoading(false);
         }
@@ -94,6 +99,19 @@ export default function DashboardPage() {
                     <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
                     <p className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Dashboard...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (stats?.hasError) {
+        return (
+            <div className="flex flex-col h-screen items-center justify-center bg-white p-8">
+                <div className="text-red-500 mb-4"><AlertCircle className="h-16 w-16" /></div>
+                <h2 className="text-2xl font-black text-gray-900 mb-2">Failed to load data</h2>
+                <p className="text-gray-500 text-center max-w-md bg-gray-50 p-4 rounded-xl border border-gray-100 font-mono text-sm">
+                    {stats.message}
+                </p>
+                <button onClick={() => window.location.reload()} className="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Try Again</button>
             </div>
         );
     }
