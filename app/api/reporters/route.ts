@@ -12,8 +12,8 @@ export async function GET(request: Request) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const offset = (page - 1) * limit;
 
-        let sql = 'SELECT * FROM Reporters_Info';
-        let countSql = 'SELECT COUNT(*) as total FROM Reporters_Info';
+        let sql = 'SELECT * FROM reporters_info';
+        let countSql = 'SELECT COUNT(*) as total FROM reporters_info';
         let values: any[] = [];
 
         if (query) {
@@ -91,7 +91,7 @@ export async function PATCH(request: Request) {
         if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
 
         values.push(id);
-        await pool.query(`UPDATE Reporters_Info SET ${fields.join(', ')} WHERE id = ?`, values);
+        await pool.query(`UPDATE reporters_info SET ${fields.join(', ')} WHERE id = ?`, values);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
@@ -109,7 +109,7 @@ export async function DELETE(request: Request) {
 
         // Note: This might fail if there are foreign key constraints in tickets.
         // We should handle that or allow deleting if tickets are deleted first.
-        await pool.query('DELETE FROM Reporters_Info WHERE id = ?', [id]);
+        await pool.query('DELETE FROM reporters_info WHERE id = ?', [id]);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

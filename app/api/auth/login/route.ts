@@ -85,9 +85,9 @@ export async function POST(req: Request) {
             }
         }
 
-        // --- Step 2: Check Admin (Broadcasters_Info) ---
+        // --- Step 2: Check Admin (broadcasters_info) ---
         const [broadcasterRows] = await pool.query<RowDataPacket[]>(
-            'SELECT * FROM Broadcasters_Info WHERE broadcaster_code = ? LIMIT 1',
+            'SELECT * FROM broadcasters_info WHERE broadcaster_code = ? LIMIT 1',
             [username]
         );
 

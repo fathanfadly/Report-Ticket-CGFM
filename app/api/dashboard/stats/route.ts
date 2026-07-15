@@ -46,15 +46,15 @@ export async function GET() {
             SELECT ta.content, ta.created_at, ta.ticket_status, 
                    COALESCE(t1.judul_laporan, t2.judul_laporan) as ticket_title, 
                    ta.ticket_id
-            FROM Ticket_Activities ta
+            FROM ticket_activities ta
             LEFT JOIN tickets t1 ON ta.ticket_id = t1.id
             LEFT JOIN completed_tickets t2 ON ta.ticket_id = t2.id
             ORDER BY ta.created_at DESC
             LIMIT 5
         `);
 
-        // Get reporter count from Broadcasters_Info as requested
-        const [broadcasterResult] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) as count FROM Broadcasters_Info');
+        // Get reporter count from broadcasters_info as requested
+        const [broadcasterResult] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) as count FROM broadcasters_info');
         const totalBroadcasters = broadcasterResult[0].count;
         
         // Use broadcasters count for active reporters
