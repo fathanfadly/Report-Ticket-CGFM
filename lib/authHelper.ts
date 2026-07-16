@@ -38,7 +38,7 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser> {
             // Lookup broadcaster name from database
             try {
                 const [bRows]: any = await pool.query(
-                    'SELECT broadcaster_name FROM Broadcasters_Info WHERE broadcaster_code = ? LIMIT 1',
+                    'SELECT broadcaster_name FROM broadcasters_info WHERE broadcaster_code = ? LIMIT 1',
                     [created_by_code]
                 );
                 if (bRows && bRows.length > 0) {

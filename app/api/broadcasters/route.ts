@@ -12,8 +12,8 @@ export async function GET(request: Request) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const offset = (page - 1) * limit;
 
-        let sql = 'SELECT id, broadcaster_code, broadcaster_name, allowed_pages, created_at, updated_at FROM Broadcasters_Info';
-        let countSql = 'SELECT COUNT(*) as total FROM Broadcasters_Info';
+        let sql = 'SELECT id, broadcaster_code, broadcaster_name, allowed_pages, created_at, updated_at FROM broadcasters_info';
+        let countSql = 'SELECT COUNT(*) as total FROM broadcasters_info';
         let values: any[] = [];
 
         if (query) {
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         const allowedPagesJson = JSON.stringify(allowed_pages || []);
 
         const [result]: any = await pool.query(
-            `INSERT INTO Broadcasters_Info (broadcaster_code, broadcaster_name, password, allowed_pages) VALUES (?, ?, ?, ?)`,
+            `INSERT INTO broadcasters_info (broadcaster_code, broadcaster_name, password, allowed_pages) VALUES (?, ?, ?, ?)`,
             [broadcaster_code, broadcaster_name, hashedPassword, allowedPagesJson]
         );
 
@@ -116,7 +116,7 @@ export async function PATCH(request: Request) {
         if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
 
         values.push(id);
-        await pool.query(`UPDATE Broadcasters_Info SET ${fields.join(', ')} WHERE id = ?`, values);
+        await pool.query(`UPDATE broadcasters_info SET ${fields.join(', ')} WHERE id = ?`, values);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
@@ -132,7 +132,7 @@ export async function DELETE(request: Request) {
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-        await pool.query('DELETE FROM Broadcasters_Info WHERE id = ?', [id]);
+        await pool.query('DELETE FROM broadcasters_info WHERE id = ?', [id]);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

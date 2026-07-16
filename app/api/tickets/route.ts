@@ -9,10 +9,10 @@ export async function GET() {
             SELECT 
                 t.*, 
                 r.tipe_pelapor, r.nama as nama_pelapor, r.no_hp as nomor_telepon, r.pekerjaan, r.alamat,
-                (SELECT COUNT(*) FROM Ticket_Activities WHERE ticket_id = t.id) as comment_count,
-                (SELECT content FROM Ticket_Activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
+                (SELECT COUNT(*) FROM ticket_activities WHERE ticket_id = t.id) as comment_count,
+                (SELECT content FROM ticket_activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
             FROM tickets t
-            LEFT JOIN Reporters_Info r ON t.reporter_id = r.id
+            LEFT JOIN reporters_info r ON t.reporter_id = r.id
             ORDER BY t.created_at DESC
         `;
         const [ongoingRows] = await pool.query<RowDataPacket[]>(query);
@@ -23,10 +23,10 @@ export async function GET() {
                 SELECT 
                     t.*, 
                     r.tipe_pelapor, r.nama as nama_pelapor, r.no_hp as nomor_telepon, r.pekerjaan, r.alamat,
-                    (SELECT COUNT(*) FROM Ticket_Activities WHERE ticket_id = t.id) as comment_count,
-                    (SELECT content FROM Ticket_Activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
+                    (SELECT COUNT(*) FROM ticket_activities WHERE ticket_id = t.id) as comment_count,
+                    (SELECT content FROM ticket_activities WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_comment
                 FROM completed_tickets t
-                LEFT JOIN Reporters_Info r ON t.reporter_id = r.id
+                LEFT JOIN reporters_info r ON t.reporter_id = r.id
                 ORDER BY t.created_at DESC
             `;
             const [rows] = await pool.query<RowDataPacket[]>(completedQuery);
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
         if (!reporter_id_to_use) {
             const [reporterResult]: any = await pool.query(
-                'INSERT INTO Reporters_Info (tipe_pelapor, nama, no_hp, pekerjaan, alamat) VALUES (?, ?, ?, ?, ?)',
+                'INSERT INTO reporters_info (tipe_pelapor, nama, no_hp, pekerjaan, alamat) VALUES (?, ?, ?, ?, ?)',
                 [tipe_pelapor, nama_pelapor, no_hp, pekerjaan, alamat]
             );
             reporter_id_to_use = reporterResult.insertId;
@@ -120,7 +120,7 @@ export async function PATCH(request: Request) {
 
             if (repFields.length > 0) {
                 repValues.push(reporter_id);
-                await pool.query(`UPDATE Reporters_Info SET ${repFields.join(', ')} WHERE id = ?`, repValues);
+                await pool.query(`UPDATE reporters_info SET ${repFields.join(', ')} WHERE id = ?`, repValues);
             }
         }
 
