@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const offset = (page - 1) * limit;
 
-        let sql = 'SELECT id, broadcaster_code, broadcaster_name, created_at, updated_at FROM Broadcasters_Info';
+        let sql = 'SELECT id, broadcaster_code, broadcaster_name, allowed_pages, created_at, updated_at FROM Broadcasters_Info';
         let countSql = 'SELECT COUNT(*) as total FROM Broadcasters_Info';
         let values: any[] = [];
 
@@ -26,7 +26,14 @@ export async function GET(request: Request) {
         if (all) {
             sql += ' ORDER BY broadcaster_name ASC';
             const [rows] = await pool.query<RowDataPacket[]>(sql, values);
-            return NextResponse.json({ data: rows });
+            // Parse JSON field
+            const parsed = rows.map((r) => ({
+                ...r,
+                allowed_pages: r.allowed_pages
+                    ? (typeof r.allowed_pages === 'string' ? JSON.parse(r.allowed_pages) : r.allowed_pages)
+                    : [],
+            }));
+            return NextResponse.json({ data: parsed });
         }
 
         sql += ' ORDER BY broadcaster_name ASC LIMIT ? OFFSET ?';
@@ -36,8 +43,15 @@ export async function GET(request: Request) {
         const [countResult] = await pool.query<RowDataPacket[]>(countSql, values);
         const total = countResult[0].total;
 
+        const parsed = rows.map((r) => ({
+            ...r,
+            allowed_pages: r.allowed_pages
+                ? (typeof r.allowed_pages === 'string' ? JSON.parse(r.allowed_pages) : r.allowed_pages)
+                : [],
+        }));
+
         return NextResponse.json({
-            data: rows,
+            data: parsed,
             pagination: {
                 total,
                 page,
@@ -54,17 +68,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { broadcaster_code, broadcaster_name, password } = body;
+        const { broadcaster_code, broadcaster_name, password, allowed_pages } = body;
 
         if (!broadcaster_code || !broadcaster_name || !password) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const allowedPagesJson = JSON.stringify(allowed_pages || []);
 
         const [result]: any = await pool.query(
-            `INSERT INTO Broadcasters_Info (broadcaster_code, broadcaster_name, password) VALUES (?, ?, ?)`,
-            [broadcaster_code, broadcaster_name, hashedPassword]
+            `INSERT INTO Broadcasters_Info (broadcaster_code, broadcaster_name, password, allowed_pages) VALUES (?, ?, ?, ?)`,
+            [broadcaster_code, broadcaster_name, hashedPassword, allowedPagesJson]
         );
 
         return NextResponse.json({ success: true, id: result.insertId });
@@ -79,7 +94,7 @@ export async function PATCH(request: Request) {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
         const body = await request.json();
-        const { broadcaster_code, broadcaster_name, password } = body;
+        const { broadcaster_code, broadcaster_name, password, allowed_pages } = body;
 
         if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
@@ -92,6 +107,10 @@ export async function PATCH(request: Request) {
             const hashedPassword = await bcrypt.hash(password, 10);
             fields.push('password = ?');
             values.push(hashedPassword);
+        }
+        if (allowed_pages !== undefined) {
+            fields.push('allowed_pages = ?');
+            values.push(JSON.stringify(allowed_pages));
         }
 
         if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });

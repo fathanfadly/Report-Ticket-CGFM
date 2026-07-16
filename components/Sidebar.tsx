@@ -7,11 +7,22 @@ import { Home, BarChart2, User, Radio, Bell, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNotifications } from '@/context/NotificationContext';
 
+// All nav items that exist in the app
+// 'key' matches the allowed_pages values set in the broadcaster form
+const ALL_NAV_ITEMS = [
+    { key: 'home',          href: '/',               icon: Home,     title: 'Home',          superadminOnly: false },
+    { key: 'dashboard',     href: '/dashboard',      icon: BarChart2,title: 'Dashboard',     superadminOnly: false },
+    { key: 'reporters',     href: '/reporters',      icon: User,     title: 'Reporters',     superadminOnly: false },
+    { key: 'broadcasters',  href: '/broadcasters',   icon: Radio,    title: 'Broadcasters',  superadminOnly: true  },
+    { key: 'notifications', href: '/notifications',  icon: Bell,     title: 'Notifications', superadminOnly: false },
+];
+
 const Sidebar = () => {
     const pathname = usePathname();
     const router = useRouter();
     const [role, setRole] = useState<string | null>(null);
     const [username, setUsername] = useState<string>('U');
+    const [allowedPages, setAllowedPages] = useState<string[] | null>(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const { unreadCount } = useNotifications();
 
@@ -24,6 +35,10 @@ const Sidebar = () => {
                     setRole(data.role);
                     if (data.username) {
                         setUsername(data.username.charAt(0).toUpperCase());
+                    }
+                    // Only set allowed_pages for broadcaster (admin) role
+                    if (data.role === 'admin' && Array.isArray(data.allowed_pages)) {
+                        setAllowedPages(data.allowed_pages);
                     }
                 }
             } catch (err) {
@@ -39,6 +54,24 @@ const Sidebar = () => {
         router.refresh();
     };
 
+    // Determine which nav items to show
+    const visibleNavItems = ALL_NAV_ITEMS.filter((item) => {
+        if (item.superadminOnly) {
+            // Broadcasters page is only for superadmin
+            return role === 'superadmin';
+        }
+        if (role === 'superadmin') {
+            // Superadmin sees everything non-superadmin-only
+            return true;
+        }
+        if (role === 'admin' && allowedPages !== null) {
+            // Broadcaster: only show pages they're allowed to see
+            return allowedPages.includes(item.key);
+        }
+        // Still loading or unknown role — show nothing sensitive
+        return false;
+    });
+
     return (
         <>
             <div className="flex h-screen w-20 flex-col items-center justify-between border-r border-gray-200 bg-white py-6">
@@ -48,66 +81,32 @@ const Sidebar = () => {
                     </Link>
 
                     <nav className="flex flex-col items-center gap-6">
-                        <Link
-                            href="/"
-                            className={clsx(
-                                "p-2 rounded-xl transition-all",
-                                pathname === '/' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
-                            )}
-                            title="Home"
-                        >
-                            <Home className="h-6 w-6" />
-                        </Link>
-                        <Link
-                            href="/dashboard"
-                            className={clsx(
-                                "p-2 rounded-xl transition-all",
-                                pathname === '/dashboard' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
-                            )}
-                            title="Dashboard"
-                        >
-                            <BarChart2 className="h-6 w-6" />
-                        </Link>
-                        <Link
-                            href="/reporters"
-                            className={clsx(
-                                "p-2 rounded-xl transition-all",
-                                pathname === '/reporters' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
-                            )}
-                            title="Reporters"
-                        >
-                            <User className="h-6 w-6" />
-                        </Link>
+                        {visibleNavItems.map(({ key, href, icon: Icon, title }) => {
+                            // Notifications item gets the badge treatment
+                            const isNotifications = key === 'notifications';
+                            const isActive = pathname === href;
 
-                        {role === 'superadmin' && (
-                            <Link
-                                href="/broadcasters"
-                                className={clsx(
-                                    "p-2 rounded-xl transition-all",
-                                    pathname === '/broadcasters' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
-                                )}
-                                title="Broadcasters"
-                            >
-                                <Radio className="h-6 w-6" />
-                            </Link>
-                        )}
-
-                        <Link
-                            href="/notifications"
-                            className={clsx(
-                                "p-2 rounded-xl transition-all relative",
-                                pathname === '/notifications' ? "bg-indigo-50 text-indigo-600 shadow-sm" : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
-                            )}
-                            title="Notifications"
-                        >
-                            <Bell className="h-6 w-6" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
-                            )}
-                        </Link>
+                            return (
+                                <Link
+                                    key={key}
+                                    href={href}
+                                    className={clsx(
+                                        "p-2 rounded-xl transition-all relative",
+                                        isActive
+                                            ? "bg-indigo-50 text-indigo-600 shadow-sm"
+                                            : "text-gray-400 hover:text-indigo-600 hover:bg-slate-50"
+                                    )}
+                                    title={title}
+                                >
+                                    <Icon className="h-6 w-6" />
+                                    {isNotifications && unreadCount > 0 && (
+                                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
+                                    )}
+                                </Link>
+                            );
+                        })}
                     </nav>
                 </div>
-
 
                 <div className="flex flex-col items-center gap-6">
                     <button onClick={() => setShowLogoutModal(true)} title="Logout" className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">

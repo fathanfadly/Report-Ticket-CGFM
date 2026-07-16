@@ -17,10 +17,17 @@ export async function GET() {
 
         const verified = await jwtVerify(token, secretKey);
         
+        // For broadcasters: prefer broadcaster_name as display name, fall back to broadcaster_code
+        const displayName = (verified.payload.broadcaster_name as string)
+            || (verified.payload.username as string)
+            || (verified.payload.broadcaster_code as string)
+            || 'User';
+
         return NextResponse.json({ 
             authenticated: true, 
             role: verified.payload.role,
-            username: verified.payload.username || verified.payload.broadcaster_code
+            username: displayName,
+            allowed_pages: (verified.payload.allowed_pages as string[]) || null,
         });
     } catch (err) {
         return NextResponse.json({ authenticated: false }, { status: 401 });

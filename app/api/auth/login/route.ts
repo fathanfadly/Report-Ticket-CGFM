@@ -98,11 +98,25 @@ export async function POST(req: Request) {
             }
 
             if (isValidPassword) {
-                // Success: generate admin token
+                // Parse allowed_pages from DB (stored as JSON)
+                let allowedPages: string[] = [];
+                if (broadcaster.allowed_pages) {
+                    try {
+                        allowedPages = typeof broadcaster.allowed_pages === 'string'
+                            ? JSON.parse(broadcaster.allowed_pages)
+                            : broadcaster.allowed_pages;
+                    } catch {
+                        allowedPages = [];
+                    }
+                }
+
+                // Success: generate admin token with allowed_pages
                 const token = await new SignJWT({ 
                     id: broadcaster.id, 
                     broadcaster_code: broadcaster.broadcaster_code,
-                    role: 'admin' 
+                    broadcaster_name: broadcaster.broadcaster_name,
+                    role: 'admin',
+                    allowed_pages: allowedPages,
                 })
                     .setProtectedHeader({ alg: 'HS256' })
                     .setIssuedAt()
