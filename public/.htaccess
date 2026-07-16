@@ -1,0 +1,22 @@
+# Disable directory browsing
+Options -Indexes
+
+# Protect .env and other sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to package.json and similar configuration files
+<FilesMatch "(package\.json|package-lock\.json|next\.config\.ts|tsconfig\.json)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Enforce HTTPS (uncomment if you want to force HTTPS via Apache)
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Note: Next.js routing is handled by Node.js. 
+# This .htaccess is only effective if you are serving this project via Apache proxy or static export.

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and internal API routes from being indexed by search engines
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /reporters/
+Disallow: /broadcasters/
+Disallow: /login
+
+Sitemap: https://yourdomain.com/sitemap.xml
