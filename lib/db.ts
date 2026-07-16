@@ -5,6 +5,7 @@ const pool = mysql.createPool({
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'radiocityguide',
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
