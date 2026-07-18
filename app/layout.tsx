@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "City Guide 911 FM | Portal Internal",
   description: "Sistem Manajemen Layanan Internal City Guide 911 FM",
+  icons: {
+    icon: '/logo.jpg?v=2',
+  }
 };
 
 export default function RootLayout({
