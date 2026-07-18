@@ -13,7 +13,7 @@ export default function LandingPage() {
                     <div className="w-10 h-10 overflow-hidden rounded-xl shadow-md border border-gray-100 flex-shrink-0">
                         <img src="/logo.jpg" alt="CGFM Logo" className="h-full w-full object-cover" />
                     </div>
-                    <span className="text-xl font-black text-gray-900 tracking-tight">CGFM</span>
+                    <span className="text-xl font-black text-gray-900 tracking-tight">City Guide 911 FM</span>
                 </div>
                 <div>
                     <Link href="/login" className="px-6 py-2.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100 font-bold transition-all flex items-center gap-2">
