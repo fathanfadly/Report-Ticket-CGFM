@@ -10,7 +10,7 @@ import { useNotifications } from '@/context/NotificationContext';
 // All nav items that exist in the app
 // 'key' matches the allowed_pages values set in the broadcaster form
 const ALL_NAV_ITEMS = [
-    { key: 'home',          href: '/',               icon: Home,     title: 'Home',          superadminOnly: false },
+    { key: 'home',          href: '/home',           icon: Home,     title: 'Home',          superadminOnly: false },
     { key: 'dashboard',     href: '/dashboard',      icon: BarChart2,title: 'Dashboard',     superadminOnly: false },
     { key: 'reporters',     href: '/reporters',      icon: User,     title: 'Reporters',     superadminOnly: false },
     { key: 'broadcasters',  href: '/broadcasters',   icon: Radio,    title: 'Broadcasters',  superadminOnly: true  },

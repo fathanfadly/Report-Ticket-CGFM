@@ -24,8 +24,8 @@ export async function proxy(request: NextRequest) {
 
     const token = request.cookies.get('token')?.value;
 
-    // If no token and trying to access anything other than login, redirect to login
-    if (!token && pathname !== '/login') {
+    // If no token and trying to access anything other than login, /, or /landing, redirect to login
+    if (!token && pathname !== '/login' && pathname !== '/' && pathname !== '/landing') {
         const loginUrl = new URL('/login', request.url);
         return NextResponse.redirect(loginUrl);
     }
@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
 
             // If already logged in and trying to access /login, redirect home
             if (pathname === '/login') {
-                return NextResponse.redirect(new URL('/', request.url));
+                return NextResponse.redirect(new URL('/home', request.url));
             }
 
             // Role-Based Access Control
