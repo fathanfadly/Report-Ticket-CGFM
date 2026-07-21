@@ -221,26 +221,86 @@ const TicketFormModal = ({ isOpen, onClose, onSave, initialData }: TicketFormMod
                             {isLoadingReporters ? (
                                 <div className="py-12 text-center text-gray-400 text-sm">Memuat data pelapor...</div>
                             ) : reporters.length > 0 ? (
-                                reporters.map((rep) => (
-                                    <button
-                                        key={rep.id}
-                                        type="button"
-                                        onClick={() => handleSelectReporter(rep)}
-                                        className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/30 text-left transition-all group"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">{rep.nama}</span>
-                                            <span className="text-xs text-gray-400">{rep.no_hp || 'No Phone'} • {rep.tipe_pelapor}</span>
+                                <>
+                                    {reporters.map((rep) => (
+                                        <button
+                                            key={rep.id}
+                                            type="button"
+                                            onClick={() => handleSelectReporter(rep)}
+                                            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/30 text-left transition-all group mb-2"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">{rep.nama}</span>
+                                                <span className="text-xs text-gray-400">{rep.no_hp || 'No Phone'} • {rep.tipe_pelapor}</span>
+                                            </div>
+                                            <div className="p-2 rounded-lg bg-gray-50 text-gray-300 group-hover:bg-white group-hover:text-indigo-400 transition-all">
+                                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </div>
+                                        </button>
+                                    ))}
+                                    {searchQuery && (
+                                        <div className="mt-4 pt-4 border-t border-gray-100">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const isPhone = /^[0-9+\-\s]+$/.test(searchQuery) && searchQuery.replace(/\D/g, '').length >= 8;
+                                                    if (isPhone) {
+                                                        setNomorTelepon(searchQuery);
+                                                        setNamaPelapor('');
+                                                    } else {
+                                                        setNamaPelapor(searchQuery);
+                                                        setNomorTelepon('');
+                                                    }
+                                                    setReporterId(null);
+                                                    setShowSelector(false);
+                                                }}
+                                                className="w-full flex items-center justify-center p-3 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors mb-2"
+                                            >
+                                                + Gunakan "{searchQuery}" sebagai data pelapor baru
+                                            </button>
                                         </div>
-                                        <div className="p-2 rounded-lg bg-gray-50 text-gray-300 group-hover:bg-white group-hover:text-indigo-400 transition-all">
-                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    )}
+                                    {!searchQuery && (
+                                        <div className="mt-4 pt-4 border-t border-gray-100">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setReporterId(null);
+                                                    setNamaPelapor('');
+                                                    setNomorTelepon('');
+                                                    setShowSelector(false);
+                                                }}
+                                                className="w-full flex items-center justify-center p-3 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
+                                            >
+                                                + Tambah Pelapor Baru
+                                            </button>
                                         </div>
-                                    </button>
-                                ))
+                                    )}
+                                </>
                             ) : (
                                 <div className="py-12 text-center">
                                     <p className="text-sm text-gray-500 mb-1">Tidak ada pelapor ditemukan</p>
-                                    <p className="text-xs text-gray-400">Coba kata kunci lain atau ketik manual.</p>
+                                    <p className="text-xs text-gray-400 mb-4">Coba kata kunci lain atau klik tombol di bawah.</p>
+                                    {searchQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const isPhone = /^[0-9+\-\s]+$/.test(searchQuery) && searchQuery.replace(/\D/g, '').length >= 8;
+                                                if (isPhone) {
+                                                    setNomorTelepon(searchQuery);
+                                                    setNamaPelapor('');
+                                                } else {
+                                                    setNamaPelapor(searchQuery);
+                                                    setNomorTelepon('');
+                                                }
+                                                setReporterId(null);
+                                                setShowSelector(false);
+                                            }}
+                                            className="px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+                                        >
+                                            + Gunakan "{searchQuery}" sebagai data baru
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>

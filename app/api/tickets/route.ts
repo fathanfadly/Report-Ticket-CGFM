@@ -68,6 +68,20 @@ export async function POST(request: Request) {
                 [tipe_pelapor, nama_pelapor, no_hp, pekerjaan, alamat]
             );
             reporter_id_to_use = reporterResult.insertId;
+        } else {
+            // Update existing reporter info if edited in the form
+            const repFields: string[] = [];
+            const repValues: any[] = [];
+            if (tipe_pelapor !== undefined) { repFields.push('tipe_pelapor = ?'); repValues.push(tipe_pelapor); }
+            if (nama_pelapor !== undefined) { repFields.push('nama = ?'); repValues.push(nama_pelapor); }
+            if (no_hp !== undefined) { repFields.push('no_hp = ?'); repValues.push(no_hp); }
+            if (pekerjaan !== undefined) { repFields.push('pekerjaan = ?'); repValues.push(pekerjaan); }
+            if (alamat !== undefined) { repFields.push('alamat = ?'); repValues.push(alamat); }
+
+            if (repFields.length > 0) {
+                repValues.push(reporter_id_to_use);
+                await pool.query(`UPDATE reporters_info SET ${repFields.join(', ')} WHERE id = ?`, repValues);
+            }
         }
 
         // 2. Insert Ticket with reporter_id
